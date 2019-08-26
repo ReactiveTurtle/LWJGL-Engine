@@ -155,7 +155,7 @@ public class Game extends Base {
         }
         skyBox.setPosition(new Vector3f().set(camera.getPosition()));
         skyBox.addY(128);
-        checkIncrease(male);
+        checkCollision(male);
 
         textureShader.bind();
         skyBox.render(textureShader);
@@ -330,7 +330,7 @@ public class Game extends Base {
     }
 
 
-    private void checkIncrease(Model model) {
+    private void checkCollision(Model model) {
         int x = (int) ((model.getX() + 32f) * 4);
         int z = (int) ((model.getZ() + 32f) * 4);
         if (model.getZ() < 32f && model.getZ() > -32f && model.getX() > -32f && model.getX() < 32f &&
