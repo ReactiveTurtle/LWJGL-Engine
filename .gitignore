@@ -1,0 +1,7 @@
+/.idea
+/out
+/META-INF
+/resources/objects
+/resources/textures
+*.log
+*.iml
