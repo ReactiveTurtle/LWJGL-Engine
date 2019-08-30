@@ -25,6 +25,8 @@ public class Game extends Base {
     private Camera camera;
     private TextureShader textureShader;
     private ColorShader colorShader;
+    private ShadowMap shadowMap;
+
     private Parallelepiped skyBox;
     private ArrayList<Parallelepiped> suns = new ArrayList<>();
     private Model model, male, car;
@@ -46,6 +48,7 @@ public class Game extends Base {
         camera.setRotationY(180);
         setCamera(camera);
         camera.setPosition(0f, 3f, -3f);
+        shadowMap = new ShadowMap();
 
         textureShader = new TextureShader();
         textureShader.create();
@@ -157,6 +160,8 @@ public class Game extends Base {
         skyBox.addY(128);
         checkCollision(male);
 
+        shadowMap.render(male);
+
         textureShader.bind();
         skyBox.render(textureShader);
         terrain.render(textureShader);
@@ -175,6 +180,10 @@ public class Game extends Base {
 
     @Override
     public void destroy() {
+
+    }
+
+    public void renderDepthMap() {
 
     }
 
