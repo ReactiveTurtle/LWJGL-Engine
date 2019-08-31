@@ -174,19 +174,6 @@ public class ColorShader extends Shader {
                 }
                 super.loadMatrix3fUniform(transposedMatrixLocation, new Matrix3f().set(new Matrix4f().set(modelMatrix).invert()).transpose());
                 super.loadVector3fUniform(cameraPositionLocation, Base.camera.getPosition());
-
-                if (Base.shadowMap != null && Base.shadowMap.getProjectionMatrix() != null) {
-                    Vector3f lightDirection = directionalLight.getDirection();
-                    float lightAngleX = (float) Math.toDegrees(Math.acos(lightDirection.y));
-                    float lightAngleY = (float) Math.toDegrees(Math.asin(lightDirection.x));
-                    float lightAngleZ = 0;
-
-                    Matrix4f lightViewMatrix = ShadowMap.updateGenericViewMatrix(new Vector3f(lightDirection).mul(5),
-                            new Vector3f(lightAngleX, lightAngleY, lightAngleZ), new Matrix4f());
-                    super.loadMatrix4fUniform(modelLightViewProjectionMatrixLocation, new Matrix4f().
-                            set(Base.shadowMap.getProjectionMatrix()).mul(lightViewMatrix.mul(modelMatrix)));
-                    super.loadIntUniform(shadowMapLocation, 1);
-                }
             } else {
                 super.loadIntUniform(materialExistsLocation, 0);
             }

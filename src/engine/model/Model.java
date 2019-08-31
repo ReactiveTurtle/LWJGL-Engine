@@ -58,11 +58,6 @@ public class Model {
             if (material != null && normalsBufferId != null) {
                 GL20.glEnableVertexAttribArray(3);
             }
-
-            if (Base.shadowMap != null) {
-                glActiveTexture(GL_TEXTURE1);
-                glBindTexture(GL_TEXTURE_2D, Base.shadowMap.getDepthMapTexture().getTextureId());
-            }
         }
 
         if (shader != null) {
@@ -323,5 +318,9 @@ public class Model {
         GL20.glVertexAttribPointer(index, size, GL11.GL_FLOAT, false, 0, 0);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
         return bufferId;
+    }
+
+    public int getVertexArrayId() {
+        return vertexArrayId;
     }
 }

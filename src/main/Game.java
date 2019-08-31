@@ -26,9 +26,6 @@ public class Game extends Base {
     private TextureShader textureShader;
     private ColorShader colorShader;
 
-    private ShadowShader shadowShader;
-    private ShadowMap shadowMap;
-
     private Parallelepiped skyBox;
     private ArrayList<Parallelepiped> suns = new ArrayList<>();
     private Model model, male, car;
@@ -50,10 +47,6 @@ public class Game extends Base {
         camera.setRotationY(180);
         setCamera(camera);
         camera.setPosition(0f, 3f, -3f);
-
-        shadowShader = new ShadowShader();
-        shadowMap = new ShadowMap();
-        setShadowMap(shadowMap);
 
         textureShader = new TextureShader();
         textureShader.create();
@@ -147,13 +140,11 @@ public class Game extends Base {
         carMaterial.setDiffuse(0.15f, 0.15f, 0.15f);
         carMaterial.setSpecular(2f, 2f, 2f);
         car.setMaterial(carMaterial);
-        shadowShader.addModel(terrain);
-        shadowShader.addModel(male);
     }
 
     @Override
     public void render() {
-        glClearColor(0 / 255f, 0 / 255f, 0 / 255f, 1.0f);
+        glClearColor(255 / 255f, 0 / 255f, 0 / 255f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glfwPollEvents();
         if (isFirstPersonCamera) {
@@ -166,8 +157,6 @@ public class Game extends Base {
         skyBox.setPosition(new Vector3f().set(camera.getPosition()));
         skyBox.addY(128);
         checkCollision(male);
-
-        shadowMap.render(shadowShader);
 
         textureShader.bind();
         skyBox.render(textureShader);
