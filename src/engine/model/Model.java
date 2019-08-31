@@ -1,5 +1,6 @@
 package engine.model;
 
+import engine.Base;
 import engine.shader.*;
 import engine.util.Texture;
 import org.joml.Matrix4f;
@@ -9,6 +10,10 @@ import org.lwjgl.opengl.*;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL13.*;
 
 public class Model {
     private int vertexArrayId, vertexBufferId, vertexCount;
@@ -39,10 +44,6 @@ public class Model {
     }
 
     public void render(Shader shader) {
-        if (shader != null) {
-            shader.load(getModelMatrix(), material);
-        }
-
         GL30.glBindVertexArray(vertexArrayId);
         GL20.glEnableVertexAttribArray(0);
 
@@ -57,6 +58,15 @@ public class Model {
             if (material != null && normalsBufferId != null) {
                 GL20.glEnableVertexAttribArray(3);
             }
+
+            if (Base.shadowMap != null) {
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, Base.shadowMap.getDepthMapTexture().getTextureId());
+            }
+        }
+
+        if (shader != null) {
+            shader.load(getModelMatrix(), material);
         }
 
         GL11.glDrawElements(GL11.GL_TRIANGLES, vertexCount, GL11.GL_UNSIGNED_INT, 0);

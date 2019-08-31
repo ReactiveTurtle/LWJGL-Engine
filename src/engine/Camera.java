@@ -4,56 +4,25 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 public class Camera {
-    private static final int PERSPECTIVE = 0;
-    private static final int ORTHOGRAPHIC = 1;
-
     private Matrix4f projectionMatrix;
 
     private Vector3f position = new Vector3f();
     private Vector3f rotation = new Vector3f();
 
-    private int type = -1;
-
     public Camera(float fieldOfView, float near, float far) {
-        type = PERSPECTIVE;
-        projectionMatrix = getPerspective(fieldOfView, near, far);
+        setProjectionMatrix(new Matrix4f().perspective((float) Math.toRadians(fieldOfView), (float) Base.width / Base.height, near, far));
     }
 
-    public Camera(float fieldOfView, float near, float far, Vector3f position, Vector3f rotation) {
-        type = PERSPECTIVE;
-        projectionMatrix = getPerspective(fieldOfView, near, far);
-        this.position.set(position.x, position.y, position.z);
-        this.rotation.set(rotation.x, rotation.y, rotation.z);
+    public Camera(float left, float right, float bottom, float top, float near, float far) {
+        setProjectionMatrix(new Matrix4f().ortho(left, right, bottom, top, near, far));
     }
 
-    public Camera(float left, float top, float right, float bottom, float near, float far) {
-        type = ORTHOGRAPHIC;
-        projectionMatrix = getOrtho(left, right, bottom, top, near, far);
-    }
-
-    public Camera(float left, float right, float bottom, float top, float near, float far, Vector3f position, Vector3f rotation) {
-        type = ORTHOGRAPHIC;
-        projectionMatrix = getOrtho(left, right, bottom, top, near, far);
-        this.position.set(position.x, position.y, position.z);
-        this.rotation.set(rotation.x, rotation.y, rotation.z);
-    }
-
-    public static Matrix4f getPerspective(float fieldOfView, float near, float far) {
-        float aspectRatio = (float) Base.width / (float) Base.height;
-        return new Matrix4f().identity().perspective(
-                (float) Math.toRadians(fieldOfView), aspectRatio, near, far);
-    }
-
-    public static Matrix4f getOrtho(float left, float right, float bottom, float top, float near, float far) {
-        return new Matrix4f().identity().ortho(left, right, bottom, top, near, far);
+    public void setProjectionMatrix(Matrix4f projectionMatrix) {
+        this.projectionMatrix = projectionMatrix;
     }
 
     public Matrix4f getProjectionMatrix() {
         return projectionMatrix;
-    }
-
-    public int getType() {
-        return type;
     }
 
     public Matrix4f getViewMatrix() {

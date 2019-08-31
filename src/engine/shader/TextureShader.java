@@ -10,6 +10,11 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE2;
+import static org.lwjgl.opengl.GL13.glActiveTexture;
+
 public class TextureShader extends Shader {
     private int typeLocation;
     private int textureSamplerLocation;
@@ -54,6 +59,8 @@ public class TextureShader extends Shader {
 
     private int transposedMatrixLocation;
     private int cameraPositionLocation;
+    private int modelLightViewProjectionMatrixLocation;
+    private int shadowMapLocation;
 
     public TextureShader() {
         super(MODEL_VERTEX_SHADER, MODEL_FRAGMENT_SHADER);
@@ -115,6 +122,8 @@ public class TextureShader extends Shader {
 
         transposedMatrixLocation = super.getUniform("transposedModelMatrix");
         cameraPositionLocation = super.getUniform("cameraPosition");
+        modelLightViewProjectionMatrixLocation = super.getUniform("modelLightViewProjectionMatrix");
+        shadowMapLocation = super.getUniform("shadowMap");
     }
 
     @Override
@@ -165,6 +174,18 @@ public class TextureShader extends Shader {
                 }
                 super.loadMatrix3fUniform(transposedMatrixLocation, new Matrix3f().set(new Matrix4f().set(modelMatrix).invert()).transpose());
                 super.loadVector3fUniform(cameraPositionLocation, Base.camera.getPosition());
+
+                if (Base.shadowMap != null && Base.shadowMap.getProjectionMatrix() != null) {
+                    Vector3f lightDirection = directionalLight.getDirection();
+                    float lightAngleX = (float) Math.toDegrees(Math.acos(lightDirection.y));
+                    float lightAngleY = (float) Math.toDegrees(Math.asin(lightDirection.x));
+                    float lightAngleZ = 0;
+
+                    Matrix4f lightViewMatrix = ShadowMap.updateGenericViewMatrix(new Vector3f(lightDirection).mul(5),
+                            new Vector3f(lightAngleX, lightAngleY, lightAngleZ), new Matrix4f());
+                    super.loadMatrix4fUniform(modelLightViewProjectionMatrixLocation, new Matrix4f().set(Base.shadowMap.getProjectionMatrix()).mul(lightViewMatrix.mul(modelMatrix)));
+                    super.loadIntUniform(shadowMapLocation, 1);
+                }
             } else {
                 super.loadIntUniform(materialExistsLocation, 0);
             }

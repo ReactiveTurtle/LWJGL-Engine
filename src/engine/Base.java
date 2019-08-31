@@ -3,6 +3,7 @@ package engine;
 import engine.environment.DirectionalLight;
 import engine.environment.PointLight;
 import engine.environment.SpotLight;
+import engine.shader.ShadowMap;
 import org.joml.Vector2d;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.Version;
@@ -41,6 +42,8 @@ public abstract class Base {
 
     public static List<PointLight> pointLightsList = new ArrayList<>();
     public static List<SpotLight> spotLightsList = new ArrayList<>();
+
+    public static ShadowMap shadowMap;
 
     private boolean isWindowFocused = true;
 
@@ -172,6 +175,10 @@ public abstract class Base {
 
     protected void removeSpotLight(int index) {
         spotLightsList.remove(index);
+    }
+
+    public static void setShadowMap(ShadowMap shadowMap) {
+        Base.shadowMap = shadowMap;
     }
 
     protected Vector2d getCursorPosition() {

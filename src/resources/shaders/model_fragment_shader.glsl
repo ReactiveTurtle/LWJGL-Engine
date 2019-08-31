@@ -46,6 +46,7 @@ in vec3 colorPalette;
 in vec2 textureCoordinates;
 in vec3 vertexNormal;
 in vec4 modelWorldPosition;
+in vec4 lightViewPosition;
 
 out vec4 fragColor;
 
@@ -66,6 +67,7 @@ uniform SpotLight spotLights[MAX_LIGHTS_COUNT];
 
 uniform mat3 transposedModelMatrix;
 uniform vec3 cameraPosition;
+uniform sampler2D shadowMap;
 
 vec3 normal;
 vec3 cameraDirection;
@@ -141,6 +143,31 @@ vec4 getSpotLightColor() {
     return result;
 }
 
+float getShadow() {
+    vec3 projCoords = lightViewPosition.xyz;
+    projCoords = projCoords * 0.5 + 0.5;
+    float bias = 0.05;
+
+    float shadowFactor = 0.0;
+    vec2 inc = 1.0 / textureSize(shadowMap, 0);
+    for (int row = -1; row <= 1; ++row)
+    {
+        for (int col = -1; col <= 1; ++col)
+        {
+            float textDepth = texture(shadowMap, projCoords.xy + vec2(row, col) * inc).r;
+            shadowFactor += projCoords.z - bias > textDepth ? 1.0 : 0.0;
+        }
+    }
+    shadowFactor /= 9.0;
+
+    if (projCoords.z > 1.0)
+    {
+        shadowFactor = 1.0;
+
+    }
+    return 1 - shadowFactor;
+}
+
 void main() {
     if (materialExists == 0) {
         if (type == 0) {
@@ -160,6 +187,10 @@ void main() {
         if (spotLightsCount > 0) {
             fragColor += getSpotLightColor();
         }
+
+        float shadow = getShadow();
+        fragColor = clamp(material.ambient * directionalLight.ambient + fragColor * shadow, 0, 1);
+
         if (type == 0) {
             fragColor *= vec4(colorPalette, 1.0f);
         } else if (type== 1) {

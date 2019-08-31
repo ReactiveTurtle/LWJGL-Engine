@@ -25,6 +25,8 @@ public class Game extends Base {
     private Camera camera;
     private TextureShader textureShader;
     private ColorShader colorShader;
+
+    private ShadowShader shadowShader;
     private ShadowMap shadowMap;
 
     private Parallelepiped skyBox;
@@ -48,7 +50,10 @@ public class Game extends Base {
         camera.setRotationY(180);
         setCamera(camera);
         camera.setPosition(0f, 3f, -3f);
+
+        shadowShader = new ShadowShader();
         shadowMap = new ShadowMap();
+        setShadowMap(shadowMap);
 
         textureShader = new TextureShader();
         textureShader.create();
@@ -142,6 +147,8 @@ public class Game extends Base {
         carMaterial.setDiffuse(0.15f, 0.15f, 0.15f);
         carMaterial.setSpecular(2f, 2f, 2f);
         car.setMaterial(carMaterial);
+        shadowShader.addModel(terrain);
+        shadowShader.addModel(male);
     }
 
     @Override
@@ -160,7 +167,7 @@ public class Game extends Base {
         skyBox.addY(128);
         checkCollision(male);
 
-        shadowMap.render(male);
+        shadowMap.render(shadowShader);
 
         textureShader.bind();
         skyBox.render(textureShader);
@@ -180,10 +187,6 @@ public class Game extends Base {
 
     @Override
     public void destroy() {
-
-    }
-
-    public void renderDepthMap() {
 
     }
 
