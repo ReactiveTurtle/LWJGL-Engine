@@ -1,4 +1,5 @@
 .idea
+.target
 ./src/test
 *.png
 *.jpg
