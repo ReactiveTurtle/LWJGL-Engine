@@ -201,9 +201,18 @@ public class BoxBody extends RigidBody {
             return new CollisionResult(false, isCollide, false);
         }
         if (rigidBody instanceof HeightMap) {
-            // FIXME: 28.08.2020
             HeightMap heightMap = (HeightMap) rigidBody;
-            return new CollisionResult(false, false, false);
+            float y = heightMap.getY(position.x, position.z);
+            float currentY = new Vector3f(position).add(center).y;
+            boolean isCollide = false;
+            if (currentY < y) {
+                translation.y = y - currentY;
+                if (translation.y < 0) {
+                    translation.y = 0;
+                }
+                isCollide = true;
+            }
+            return new CollisionResult(false, isCollide, false);
         }
         if (rigidBody instanceof BoxBody) {
             BoxBody boxBody = (BoxBody) rigidBody;
