@@ -191,7 +191,7 @@ public abstract class Shader {
         buffer.flip();
     }
 
-    public abstract void load(Matrix4f modelMatrix, Mesh mesh);
+    public abstract void load(Stage stage, Matrix4f model, Mesh mesh);
 
     private String readFile(String file) {
         StringBuilder string = new StringBuilder();

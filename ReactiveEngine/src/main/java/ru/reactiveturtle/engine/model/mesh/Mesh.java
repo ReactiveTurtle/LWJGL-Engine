@@ -2,10 +2,14 @@ package ru.reactiveturtle.engine.model.mesh;
 
 import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.*;
-import ru.reactiveturtle.engine.base.GameContext;
-import ru.reactiveturtle.engine.material.Material;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL30;
 import ru.reactiveturtle.engine.base.Shader;
+import ru.reactiveturtle.engine.base.Stage;
+import ru.reactiveturtle.engine.material.Material;
+import ru.reactiveturtle.engine.shadow.ShadowShader;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -33,18 +37,18 @@ public class Mesh {
         GL30.glBindVertexArray(0);
     }
 
-    public void renderShadow(Matrix4f modelMatrix) {
+    public void renderShadow(Stage stage, Matrix4f modelMatrix) {
         GL30.glBindVertexArray(vertexArrayId);
         GL20.glEnableVertexAttribArray(0);
 
-        GameContext.getShadowManager().getShadowShader().load(modelMatrix, this);
+        stage.getGameContext().getShadowManager().getShadowShader().load(stage, modelMatrix, this);
         GL20.glDrawElements(GL11.GL_TRIANGLES, vertexCount, GL11.GL_UNSIGNED_INT, 0);
 
         GL20.glDisableVertexAttribArray(0);
         GL30.glBindVertexArray(0);
     }
 
-    public void render(Shader shader, Matrix4f modelMatrix) {
+    public void render(Stage stage, Shader shader, Matrix4f modelMatrix) {
         GL30.glBindVertexArray(vertexArrayId);
         GL20.glEnableVertexAttribArray(0);
 
@@ -65,11 +69,13 @@ public class Mesh {
                 }
             }
             glActiveTexture(GL_TEXTURE2);
-            GL11.glBindTexture(GL_TEXTURE_2D, GameContext.lights.get(0).getShadowMap().getShadowTexture().getTextureId());
+            if (stage.getLights().get(0).getShadowMap() != null) {
+                GL11.glBindTexture(GL_TEXTURE_2D, stage.getLights().get(0).getShadowMap().getShadowTexture().getTextureId());
+            }
         }
 
         if (shader != null) {
-            shader.load(modelMatrix, this);
+            shader.load(stage, modelMatrix, this);
         }
 
         GL20.glDrawElements(GL11.GL_TRIANGLES, vertexCount, GL11.GL_UNSIGNED_INT, 0);

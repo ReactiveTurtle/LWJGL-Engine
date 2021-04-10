@@ -2,9 +2,9 @@ package ru.reactiveturtle.engine.model;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import ru.reactiveturtle.engine.base.Stage;
 import ru.reactiveturtle.engine.base.Transform3D;
 import ru.reactiveturtle.engine.model.mesh.Mesh;
-import ru.reactiveturtle.engine.base.GameContext;
 import ru.reactiveturtle.engine.base.Shader;
 import ru.reactiveturtle.engine.material.Material;
 import ru.reactiveturtle.engine.shadow.Shadow;
@@ -12,7 +12,7 @@ import ru.reactiveturtle.engine.shadow.Shadow;
 import java.util.HashMap;
 
 public class Model extends Transform3D implements Shadow, Renderable, Releasable {
-    private Vector3f scale = new Vector3f(1f, 1f, 1f);
+    private final Vector3f scale = new Vector3f(1f, 1f, 1f);
 
     protected HashMap<String, Mesh> meshes = new HashMap<>();
 
@@ -35,26 +35,26 @@ public class Model extends Transform3D implements Shadow, Renderable, Releasable
     public Matrix4f getModelMatrix() {
         return new Matrix4f().identity()
                 .translate(getPosition())
-                .rotateXYZ((float) Math.toRadians(getRotationX()),
-                        (float) Math.toRadians(getRotationY()),
-                        (float) Math.toRadians(getRotationZ()))
+                .rotateXYZ(getRotationX(),
+                        getRotationY(),
+                        getRotationZ())
                 .scale(getScale());
     }
 
     @Override
-    public void renderShadow() {
-        if (GameContext.getShadowManager().isShadowEnabled()) {
+    public void renderShadow(Stage stage) {
+        if (stage.getGameContext().getShadowManager().isShadowEnabled()) {
             for (Mesh mesh : meshes.values()) {
-                mesh.renderShadow(getModelMatrix());
+                mesh.renderShadow(stage, getModelMatrix());
             }
         }
     }
 
     @Override
-    public void render() {
+    public void render(Stage stage) {
         shader.bind();
         for (Mesh mesh : meshes.values()) {
-            mesh.render(shader, getModelMatrix());
+            mesh.render(stage, shader, getModelMatrix());
         }
         shader.unbind();
     }

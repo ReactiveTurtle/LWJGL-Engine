@@ -4,9 +4,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import ru.reactiveturtle.engine.material.Material;
 import ru.reactiveturtle.engine.material.Texture;
-import ru.reactiveturtle.engine.model.base.Parallelepiped;
 import ru.reactiveturtle.engine.model.mesh.Mesh;
-import ru.reactiveturtle.engine.shader.TextureShader;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -19,21 +17,23 @@ public class HeightMap extends Model {
     private float[] vertices;
     private float[] normals;
     private float width, height;
-    private Texture heightMap;
+    private int mapWidth, mapHeight;
 
     public static HeightMap create(Texture heightMap, float width, float height, float depth, float textureX, float textureY) {
-        return new HeightMap(width, depth, getVertices(heightMap, width, height, depth), heightMap, textureX, textureY);
+        return new HeightMap(width, depth, getVertices(heightMap, width, height, depth),
+                heightMap.getWidth(), heightMap.getHeight(), textureX, textureY);
     }
 
-    private HeightMap(float width, float height, float[] vertices, Texture heightMap, float textureX, float textureY) {
-        super(new Mesh("heightMap", vertices, getIndices(heightMap.getWidth(), heightMap.getHeight())));
-        this.heightMap = heightMap;
+    public HeightMap(float width, float height, float[] vertices, int mapWidth, int mapHeight, float textureX, float textureY) {
+        super(new Mesh("heightMap", vertices, getIndices(mapWidth, mapHeight)));
+        this.mapWidth = mapWidth;
+        this.mapHeight = mapHeight;
         this.width = width;
         this.height = height;
         this.vertices = vertices;
         Mesh mesh = meshes.get("heightMap");
-        mesh.setTextureCoordinates(getTextureCoordinates(heightMap.getWidth(), heightMap.getHeight(), textureX, textureY));
-        this.normals = getNormals(vertices, heightMap.getWidth(), heightMap.getHeight());
+        mesh.setTextureCoordinates(getTextureCoordinates(mapWidth, mapHeight, textureX, textureY));
+        this.normals = getNormals(vertices, mapWidth, mapHeight);
         mesh.setNormals(normals);
     }
 
@@ -47,7 +47,6 @@ public class HeightMap extends Model {
         float[] vertices = new float[18 * (imageWidth - 1) * (imageHeight - 1)];
         float halfWidth = -width / 2f;
         float halfDepth = -depth / 2f;
-        System.out.println(halfDepth);
         for (int i = 0; i < imageHeight - 1; i++) {
             for (int j = 0; j < imageWidth - 1; j++) {
                 int part = (i * (imageWidth - 1) + j) * 18;
@@ -81,7 +80,6 @@ public class HeightMap extends Model {
                 vertices[part + 17] = halfDepth + zBias * (i + 1);
             }
         }
-        System.out.println(vertices.length);
         return vertices;
     }
 
@@ -138,7 +136,6 @@ public class HeightMap extends Model {
                 addNormals(normals, v0, v1);
             }
         }
-        System.out.println(normals.size());
         smoothNormals(normals, width - 1, height - 1);
         return toFloatArray(normals);
     }
@@ -295,15 +292,10 @@ public class HeightMap extends Model {
         normals.set(leftBottom + 17, normals.get(leftBottom + 2));
     }
 
-    private final static double length45 = Math.sqrt(2) / 2;
-
     public float getY(float x, float z) {
         try {
-            int mapWidth = heightMap.getWidth() - 1;
-            int mapHeight = heightMap.getHeight() - 1;
-
-            float mapX = (x + width / 2f + getX()) / width * (mapWidth + 1);
-            float mapZ = (z + height / 2f + getZ()) / height * (mapHeight + 1) - 1;
+            float mapX = (x + width / 2f + getX()) / width * (mapWidth);
+            float mapZ = (z + height / 2f + getZ()) / height * (mapHeight);
 
             float mapModX = (float) (mapX - Math.floor(mapX));
             float mapModZ = (float) (mapZ - Math.floor(mapZ));
@@ -311,32 +303,31 @@ public class HeightMap extends Model {
             mapX = (int) mapX;
             mapZ = (int) mapZ;
 
-            int positionLeftTop = ((int) (mapZ * mapWidth
-                    + mapX + mapWidth)) * 18 + 4;
+            int positionLeftTop = ((int) (mapZ * (mapWidth - 1)
+                    + mapX)) * 18 + 3;
             int positionRightTop = positionLeftTop + 3;
             int positionLeftBottom = positionLeftTop - 3;
             int positionRightBottom = positionLeftTop + 9;
 
-            float yTop;
-            float yBottom;
+            Vector3f A = new Vector3f(vertices[positionRightTop], vertices[positionRightTop + 1], vertices[positionRightTop + 2]);
+            Vector3f C = new Vector3f(vertices[positionLeftBottom], vertices[positionLeftBottom + 1], vertices[positionLeftBottom + 2]);
             float length = new Vector2f(mapModX, mapModZ).length();
-            if (length < length45) {
-                yTop = vertices[positionLeftTop]
-                        - (vertices[positionLeftTop] - vertices[positionRightTop]) * mapModX;
-                yBottom = vertices[positionLeftBottom]
-                        - (vertices[positionLeftBottom] - vertices[positionRightTop]) * mapModX;
-            } else if (length > length45) {
-                yTop = vertices[positionLeftBottom]
-                        - (vertices[positionLeftBottom] - vertices[positionRightTop]) * mapModX;
-                yBottom = vertices[positionLeftBottom]
-                        - (vertices[positionLeftBottom] - vertices[positionRightBottom]) * mapModX;
+            if (new Vector2f(x, z).sub(new Vector2f(vertices[positionLeftTop], vertices[positionLeftTop + 2])).length() <
+                    new Vector2f(x, z).sub(new Vector2f(vertices[positionRightBottom], vertices[positionRightBottom + 2])).length()) {
+                Vector3f B = new Vector3f(vertices[positionLeftTop], vertices[positionLeftTop + 1], vertices[positionLeftTop + 2]);
+                float xsFactor = (B.y - A.y) * (C.z - A.z) - (B.z - A.z) * (C.y - A.y);
+                float ysFactor = -((B.x - A.x) * (C.z - A.z) - (B.z - A.z) * (C.x - A.x));
+                float zsFactor = (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x);
+                float D = -A.x * xsFactor - A.y * ysFactor - A.z * zsFactor;
+                return (-xsFactor * x - zsFactor * z - D) / ysFactor;
             } else {
-                yTop = vertices[positionLeftBottom]
-                        - (vertices[positionLeftBottom] - vertices[positionRightTop]) * mapModX;
-                yBottom = yTop;
-                System.out.println("Равно");
+                Vector3f B = new Vector3f(vertices[positionRightBottom], vertices[positionRightBottom + 1], vertices[positionRightBottom + 2]);
+                float xsFactor = (B.y - A.y) * (C.z - A.z) - (B.z - A.z) * (C.y - A.y);
+                float ysFactor = -((B.x - A.x) * (C.z - A.z) - (B.z - A.z) * (C.x - A.x));
+                float zsFactor = (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x);
+                float D = -A.x * xsFactor - A.y * ysFactor - A.z * zsFactor;
+                return (-xsFactor * x - zsFactor * z - D) / ysFactor;
             }
-            return yTop - (yTop - yBottom) * mapModZ;
         } catch (IndexOutOfBoundsException e) {
             return 0;
         }
@@ -344,14 +335,8 @@ public class HeightMap extends Model {
 
     public Vector3f getRotation(float x, float z) {
         try {
-            int mapWidth = heightMap.getWidth() - 1;
-            int mapHeight = heightMap.getHeight() - 1;
-
             float mapX = (x + width / 2f + getX()) / width * (mapWidth + 1);
-            float mapZ = (z + height / 2f + getZ()) / height * (mapHeight + 1) - 1;
-
-            float mapModX = (float) (mapX - Math.floor(mapX));
-            float mapModZ = (float) (mapZ - Math.floor(mapZ));
+            float mapZ = (z + height / 2f + getZ()) / height * (mapHeight + 1);
 
             mapX = (int) mapX;
             mapZ = (int) mapZ;
@@ -369,7 +354,8 @@ public class HeightMap extends Model {
             normal.add(normals[positionRightTop],
                     normals[positionRightTop + 1],
                     normals[positionRightTop + 2]);
-            if (new Vector2f(mapModX, mapModZ).length() < length45) {
+            if (new Vector2f(x, z).sub(new Vector2f(vertices[positionLeftTop], vertices[positionLeftTop + 2])).length() <
+                    new Vector2f(x, z).sub(new Vector2f(vertices[positionRightBottom], vertices[positionRightBottom + 2])).length()) {
                 normal.add(normals[positionLeftTop],
                         normals[positionLeftTop + 1],
                         normals[positionLeftTop + 2]);
@@ -392,8 +378,12 @@ public class HeightMap extends Model {
         }
     }
 
-    public Texture getHeightMap() {
-        return heightMap;
+    public int getMapWidth() {
+        return mapWidth;
+    }
+
+    public int getMapHeight() {
+        return mapHeight;
     }
 
     public float getWidth() {

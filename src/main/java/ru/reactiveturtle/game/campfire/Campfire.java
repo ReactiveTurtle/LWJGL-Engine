@@ -2,12 +2,13 @@ package ru.reactiveturtle.game.campfire;
 
 import org.joml.Vector3f;
 import ru.reactiveturtle.engine.base.GameContext;
+import ru.reactiveturtle.engine.base.Stage;
 import ru.reactiveturtle.engine.light.PointLight;
 import ru.reactiveturtle.engine.model.Model;
 import ru.reactiveturtle.engine.model.loader.ObjLoader;
 import ru.reactiveturtle.engine.particle.ParticleShader;
 import ru.reactiveturtle.engine.shader.TextureShader;
-import ru.reactiveturtle.game.player.GameObject;
+import ru.reactiveturtle.game.base.Entity;
 import ru.reactiveturtle.game.types.Collectable;
 import ru.reactiveturtle.game.types.Combustible;
 import ru.reactiveturtle.game.types.Firebox;
@@ -15,7 +16,7 @@ import ru.reactiveturtle.game.world.DayNight;
 
 import java.io.IOException;
 
-public class Campfire extends GameObject implements Firebox {
+public class Campfire extends Entity implements Firebox {
     private Model mStone, mFirewood;
     private Flame mFlame;
     private PointLight mPointLight;
@@ -23,10 +24,8 @@ public class Campfire extends GameObject implements Firebox {
 
     public Campfire(int id, String name,
                     PointLight pointLight, TextureShader textureShader, ParticleShader particleShader) {
-        super(id, name, new Model[0], new Vector3f(), new Vector3f());
+        super(id, name);
         try {
-            setSelectBox(1.2f, 0.2f, 1.2f);
-            setSelectBoxY(0.1f);
             mStone = ObjLoader.load("object/campfire/campfire_stone");
             mStone.setShader(textureShader);
             mFirewood = ObjLoader.load("object/campfire/firewood");
@@ -43,49 +42,24 @@ public class Campfire extends GameObject implements Firebox {
     }
 
     @Override
-    public void renderShadow() {
-        mStone.renderShadow();
-        mFirewood.renderShadow();
+    public void renderShadow(Stage stage) {
+        mStone.renderShadow(stage);
+        mFirewood.renderShadow(stage);
     }
 
     @Override
-    public void setDefaultPosition(Vector3f defaultPosition) {
-        super.setDefaultPosition(defaultPosition);
-        if (mStone == null)
-            return;
-        mStone.setPosition(defaultPosition);
-        mFirewood.setPosition(defaultPosition);
-        mFlame.getBaseParticle().getParticleInfo().setPosition(defaultPosition);
-    }
-
-    @Override
-    public void setDefaultRotation(Vector3f defaultRotation) {
-        super.setDefaultRotation(defaultRotation);
-        if (mStone == null)
-            return;
-        mStone.setRotation(defaultRotation);
-        mFirewood.setRotation(defaultRotation);
-        mFlame.getBaseParticle().getParticleInfo().setRotation(defaultRotation);
-    }
-
-    @Override
-    public void render(Vector3f direction, Vector3f position) {
-        render();
-    }
-
-    private void render() {
-        mStone.render();
-        mFirewood.render();
+    public void render(Stage stage) {
+        mStone.render(stage);
+        mFirewood.render(stage);
         if (mFlame.isActive()) {
             if (mFlame.mBurningTime <= 0) {
                 mFlame.setActive(false);
                 mFlame.mBurningTime = 0;
             } else if (mFlame.mBurningTime > 0) {
-                double deltaTime = GameContext.getDeltaTime();
+                double deltaTime = stage.getGameContext().getDeltaTime();
                 mFlame.mBurningTime -= deltaTime * DayNight.secondsPerRealSecond;
                 float realSeconds = mFlame.mBurningTime / DayNight.secondsPerRealSecond;
-                float k = (float) Math.sqrt((realSeconds > Flame.limit ?
-                        Flame.limit : realSeconds) / Flame.limit);
+                float k = (float) Math.sqrt((Math.min(realSeconds, Flame.limit)) / Flame.limit);
                 long ttl = (long) (k * 1000);
                 mFlame.defaultParticleInfo.setTtl(ttl);
                 mFlame.defaultParticleInfo.setMaxTtl(ttl);
@@ -119,5 +93,10 @@ public class Campfire extends GameObject implements Firebox {
     @Override
     public float getBurningTime() {
         return mFlame.getBurningTime();
+    }
+
+    @Override
+    public int getNextState() {
+        return 0;
     }
 }

@@ -8,7 +8,7 @@ import static org.lwjgl.opengl.GL11.glClearColor;
 
 public class DayNight {
     private DirectionalLight directionalLight;
-    public static final float dayLongTime = 40 * 60;
+    public static final float dayLongTime = 40 * 60; // minutes * seconds
     public static final float secondsPerRealSecond = 12 * 60 * 60 / dayLongTime;
     private float speed = (float) (Math.PI / dayLongTime);
     private float angle;

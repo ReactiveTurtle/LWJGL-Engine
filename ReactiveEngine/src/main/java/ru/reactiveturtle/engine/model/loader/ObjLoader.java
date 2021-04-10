@@ -286,8 +286,6 @@ public class ObjLoader {
                         material.setEmission(toVector3f(emission));
                         break;
                     case "map_kd":
-                        material.setTexture(new Texture(dir + "/" + param[1]));
-                        break;
                     case "map_bump":
                         material.setTexture(new Texture(dir + "/" + param[1]));
                         break;

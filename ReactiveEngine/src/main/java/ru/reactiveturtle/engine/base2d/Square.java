@@ -2,6 +2,7 @@ package ru.reactiveturtle.engine.base2d;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import ru.reactiveturtle.engine.base.Stage;
 import ru.reactiveturtle.engine.base.Transform3D;
 import ru.reactiveturtle.engine.model.mesh.Mesh;
 import ru.reactiveturtle.engine.material.Material;
@@ -44,9 +45,9 @@ public class Square extends Transform3D {
                 .scale(scale);
     }
 
-    public void draw() {
+    public void draw(Stage stage) {
         glEnable(GL_BLEND);
-        mesh.render(shader, getModelMatrix());
+        mesh.render(stage, shader, getModelMatrix());
         glDisable(GL_BLEND);
     }
 

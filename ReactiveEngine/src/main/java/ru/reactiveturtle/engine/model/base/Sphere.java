@@ -5,15 +5,15 @@ import ru.reactiveturtle.engine.model.Model;
 import ru.reactiveturtle.engine.model.mesh.Mesh;
 
 public class Sphere extends Model {
-    public Sphere(float radius, int quality) {
-        float[][] params = getParams(radius, quality);
+    public Sphere(float radius, int quality, boolean isSmooth) {
+        float[][] params = getParams(radius, quality, isSmooth);
         Mesh mesh = new Mesh("sphere", params[0], getIndices(quality));
         mesh.setNormals(params[1]);
         mesh.setTextureCoordinates(getTextureCoords(quality));
         meshes.put("sphere", mesh);
     }
 
-    public static float[][] getParams(float radius, int quality) {
+    public static float[][] getParams(float radius, int quality, boolean isSmooth) {
         int vertexCount = 0;
         for (int i = 0; i < quality; i++) {
             vertexCount += i * 2 + 1;
@@ -57,9 +57,15 @@ public class Sphere extends Model {
                             (params[0][index + 1] + params[0][index + 4] + params[0][index + 7]) / 3f,
                             (params[0][index + 2] + params[0][index + 5] + params[0][index + 8]) / 3f);
                     for (int l = 0; l < 3; l++) {
-                        params[1][index + l * 3] = normal.x;
-                        params[1][index + l * 3 + 1] = normal.y;
-                        params[1][index + l * 3 + 2] = normal.z;
+                        if (isSmooth) {
+                            params[1][index + l * 3] = params[0][index + l * 3];
+                            params[1][index + l * 3 + 1] = params[0][index + l * 3 + 1];
+                            params[1][index + l * 3 + 2] = params[0][index + l * 3 + 2];
+                        } else {
+                            params[1][index + l * 3] = normal.x;
+                            params[1][index + l * 3 + 1] = normal.y;
+                            params[1][index + l * 3 + 2] = normal.z;
+                        }
                     }
                 }
             }
@@ -100,9 +106,15 @@ public class Sphere extends Model {
                             (params[0][index + 1] + params[0][index + 4] + params[0][index + 7]) / 3f,
                             (params[0][index + 2] + params[0][index + 5] + params[0][index + 8]) / 3f);
                     for (int l = 0; l < 3; l++) {
-                        params[1][index + l * 3] = normal.x;
-                        params[1][index + l * 3 + 1] = normal.y;
-                        params[1][index + l * 3 + 2] = normal.z;
+                        if (isSmooth) {
+                            params[1][index + l * 3] = params[0][index + l * 3];
+                            params[1][index + l * 3 + 1] = params[0][index + l * 3 + 1];
+                            params[1][index + l * 3 + 2] = params[0][index + l * 3 + 2];
+                        } else {
+                            params[1][index + l * 3] = normal.x;
+                            params[1][index + l * 3 + 1] = normal.y;
+                            params[1][index + l * 3 + 2] = normal.z;
+                        }
                     }
                 }
             }

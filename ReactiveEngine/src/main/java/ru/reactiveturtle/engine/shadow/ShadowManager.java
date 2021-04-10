@@ -1,6 +1,6 @@
 package ru.reactiveturtle.engine.shadow;
 
-import ru.reactiveturtle.engine.base.GameContext;
+import ru.reactiveturtle.engine.base.Stage;
 import ru.reactiveturtle.engine.light.DirectionalLight;
 import ru.reactiveturtle.engine.light.Light;
 
@@ -29,10 +29,10 @@ public class ShadowManager {
         return mShadowShader;
     }
 
-    public void renderShadow(Shadow... shadowRenderables) {
+    public void renderShadow(Stage stage, Shadow... shadowRenderables) {
         if (mIsShadowEnabled) {
             glCullFace(GL_FRONT);
-            DirectionalLight[] directionalLights = Light.getDirectionalLights(GameContext.lights);
+            DirectionalLight[] directionalLights = Light.getDirectionalLights(stage.getLights());
             for (DirectionalLight directionalLight : directionalLights) {
                 if (directionalLight.getShadowMap() != null) {
                     mShadowShader.bind();
@@ -42,7 +42,7 @@ public class ShadowManager {
                     glClear(GL_DEPTH_BUFFER_BIT);
                     renderingDirectionalLight = directionalLight;
                     for (Shadow shadowRenderable : shadowRenderables) {
-                        shadowRenderable.renderShadow();
+                        shadowRenderable.renderShadow(stage);
                     }
                     mShadowShader.unbind();
                 }

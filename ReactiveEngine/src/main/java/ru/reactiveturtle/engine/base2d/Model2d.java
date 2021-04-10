@@ -3,6 +3,7 @@ package ru.reactiveturtle.engine.base2d;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import ru.reactiveturtle.engine.base.Stage;
 import ru.reactiveturtle.engine.model.mesh.Mesh;
 import ru.reactiveturtle.engine.material.Texture;
 
@@ -39,10 +40,10 @@ class Model2d {
                         (float) Math.toRadians(getRotationY()), 0);
     }
 
-    public void draw() {
+    public void draw(Stage stage) {
         glEnable(GL_BLEND);
         for (Mesh mesh : meshes.values()) {
-            mesh.render(shader, getModelMatrix());
+            mesh.render(stage, shader, getModelMatrix());
         }
         glDisable(GL_BLEND);
     }

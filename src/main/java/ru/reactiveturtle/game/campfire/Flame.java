@@ -1,6 +1,7 @@
 package ru.reactiveturtle.game.campfire;
 
 import org.joml.Vector3f;
+import ru.reactiveturtle.engine.base.Stage;
 import ru.reactiveturtle.engine.material.Texture;
 import ru.reactiveturtle.engine.particle.FlowParticle;
 import ru.reactiveturtle.engine.particle.Particle;
@@ -38,12 +39,16 @@ public class Flame extends FlowParticle {
         return mBurningTime;
     }
 
-    public void render(float cameraRotationY) {
+    public void render(Stage stage, float cameraRotationY) {
         for (ParticleInfo particleInfo : getPositions()) {
             particleInfo.setRotationY(cameraRotationY);
             baseParticle.setParticleInfo(particleInfo);
             baseParticle.getParticleInfo().setScale(particleInfo.getAlpha() / 2f);
-            baseParticle.draw(particleInfo.getAlpha());
+            baseParticle.draw(stage, particleInfo.getAlpha());
         }
+    }
+
+    public void setPosition(Vector3f position) {
+        defaultParticleInfo.setPosition(position);
     }
 }

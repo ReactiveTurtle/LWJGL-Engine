@@ -2,14 +2,17 @@ package ru.reactiveturtle.game.player;
 
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import ru.reactiveturtle.engine.base.Stage;
 import ru.reactiveturtle.engine.base.Transform3D;
+import ru.reactiveturtle.engine.module.moving.Movable;
 import ru.reactiveturtle.engine.shadow.Shadow;
+import ru.reactiveturtle.game.base.Entity;
 import ru.reactiveturtle.game.types.Builder;
 import ru.reactiveturtle.game.types.Collectable;
 import ru.reactiveturtle.game.types.Destroyer;
 import ru.reactiveturtle.physics.RigidBody;
 
-public class Player extends Transform3D implements Shadow {
+public class Player extends Transform3D implements Movable, Shadow {
     private boolean isLockYMove = false;
     private boolean isLockTopBottomRotation = false;
 
@@ -42,9 +45,9 @@ public class Player extends Transform3D implements Shadow {
 
     private Vector3f cameraPosition = new Vector3f();
 
-    public Player() {
+    public Player(float aspectRatio) {
         setMovement(Movement.WALK);
-        mUI = new Interface();
+        mUI = new Interface(aspectRatio);
         mInventory = new Inventory();
         mUI.updateInventoryImage(mInventory);
         mNeeds = new Needs();
@@ -140,7 +143,7 @@ public class Player extends Transform3D implements Shadow {
     public boolean takeInventoryItem(Collectable item) {
         int position = mInventory.getCurrentItemPosition();
         while (position < mInventory.getInventorySize() && mInventory.getItem(position) != null &&
-                !((GameObject)mInventory.getItem(position)).name.equals(((GameObject) item).name)){
+                !((Entity) mInventory.getItem(position)).getName().equals(((Entity) item).getName())) {
             position++;
         }
         if (position < mInventory.getInventorySize()) {
@@ -155,7 +158,7 @@ public class Player extends Transform3D implements Shadow {
         return mNeeds.addHunger(calories);
     }
 
-    public Collectable throwIntentoryItem() {
+    public Collectable throwInventoryItem() {
         Collectable item = mInventory.getCurrentItem();
         removeCurrentInventoryItem();
         return item;
@@ -186,8 +189,8 @@ public class Player extends Transform3D implements Shadow {
         return mRightHandTool == null;
     }
 
-    public void renderUI(double deltaTime) {
-        mUI.render(deltaTime);
+    public void renderUI(Stage stage, double deltaTime) {
+        mUI.render(stage, deltaTime);
     }
 
     public Interface getUI() {
@@ -195,13 +198,13 @@ public class Player extends Transform3D implements Shadow {
     }
 
     @Override
-    public void renderShadow() {
+    public void renderShadow(Stage stage) {
         if (mRightHandTool != null) {
-            ((GameObject) mRightHandTool).getModel().renderShadow();
+            ((Entity) mRightHandTool).getCurrentState().renderShadow(stage);
         }
     }
 
-    public void render(double deltaTime) {
+    public void render(Stage stage, double deltaTime) {
         mNeeds.update(deltaTime, getMovement());
         mUI.updateNeedsImage(mNeeds);
         if (mIsShaking) {
@@ -211,10 +214,10 @@ public class Player extends Transform3D implements Shadow {
             calcHit(deltaTime);
         }
         if (mRightHandTool != null) {
-            GameObject tool = (GameObject) mRightHandTool;
-            tool.getModel().setPosition(mRightHandToolPosition);
-            tool.getModel().setRotation(mRightHandToolRotation);
-            tool.getModel().render();
+            Entity tool = (Entity) mRightHandTool;
+            tool.getCurrentState().setPosition(mRightHandToolPosition);
+            tool.getCurrentState().setRotation(mRightHandToolRotation);
+            tool.getCurrentState().render(stage);
         }
     }
 
@@ -282,10 +285,11 @@ public class Player extends Transform3D implements Shadow {
     }
 
     public void jump() {
-        rigidBody.setUpHeight(2);
+        rigidBody.setUpHeight(1f);
     }
 
     private RigidBody rigidBody;
+
     public void setRigidBody(RigidBody rigidBody) {
         this.rigidBody = rigidBody;
     }

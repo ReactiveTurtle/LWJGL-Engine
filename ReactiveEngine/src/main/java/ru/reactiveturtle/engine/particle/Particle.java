@@ -2,6 +2,7 @@ package ru.reactiveturtle.engine.particle;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import ru.reactiveturtle.engine.base.Stage;
 import ru.reactiveturtle.engine.base2d.Square;
 import ru.reactiveturtle.engine.model.mesh.Mesh;
 import ru.reactiveturtle.engine.material.Texture;
@@ -46,13 +47,13 @@ public class Particle implements Cloneable{
                 .scale(particleInfo.getScale());
     }
 
-    public void draw(float alpha) {
+    public void draw(Stage stage, float alpha) {
         shader.bind();
         glDepthMask(false);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         shader.loadAlpha(alpha);
-        mesh.render(shader, getModelMatrix());
+        mesh.render(stage, shader, getModelMatrix());
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_BLEND);
         glDepthMask(true);

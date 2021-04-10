@@ -1,6 +1,7 @@
 package ru.reactiveturtle.physics;
 
 import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 public class HeightMap extends RigidBody {
     private float[] vertices;
@@ -33,15 +34,13 @@ public class HeightMap extends RigidBody {
                 rigidBody.isCollide(this, testCount);
     }
 
-    private final static double length45 = Math.sqrt(2) / 2;
-
     public float getY(float x, float z) {
         try {
-            int mapWidth = textureWidth - 1;
-            int mapHeight = textureHeight - 1;
+            int mapWidth = textureWidth;
+            int mapHeight = textureHeight;
 
-            float mapX = (x + width / 2f + getX()) / width * (mapWidth + 1);
-            float mapZ = (z + height / 2f + getZ()) / height * (mapHeight + 1) - 1;
+            float mapX = (x + width / 2f + getX()) / width * (mapWidth);
+            float mapZ = (z + height / 2f + getZ()) / height * (mapHeight);
 
             float mapModX = (float) (mapX - Math.floor(mapX));
             float mapModZ = (float) (mapZ - Math.floor(mapZ));
@@ -49,31 +48,30 @@ public class HeightMap extends RigidBody {
             mapX = (int) mapX;
             mapZ = (int) mapZ;
 
-            int positionLeftTop = ((int) (mapZ * mapWidth
-                    + mapX + mapWidth)) * 18 + 4;
+            int positionLeftTop = ((int) (mapZ * (mapWidth - 1)
+                    + mapX)) * 18 + 3;
             int positionRightTop = positionLeftTop + 3;
             int positionLeftBottom = positionLeftTop - 3;
             int positionRightBottom = positionLeftTop + 9;
 
-            float yTop;
-            float yBottom;
-            float length = new Vector2f(mapModX, mapModZ).length();
-            if (length < length45) {
-                yTop = vertices[positionLeftTop]
-                        - (vertices[positionLeftTop] - vertices[positionRightTop]) * mapModX;
-                yBottom = vertices[positionLeftBottom]
-                        - (vertices[positionLeftBottom] - vertices[positionRightTop]) * mapModX;
-            } else if (length > length45) {
-                yTop = vertices[positionLeftBottom]
-                        - (vertices[positionLeftBottom] - vertices[positionRightTop]) * mapModX;
-                yBottom = vertices[positionLeftBottom]
-                        - (vertices[positionLeftBottom] - vertices[positionRightBottom]) * mapModX;
+            Vector3f A = new Vector3f(vertices[positionRightTop], vertices[positionRightTop + 1], vertices[positionRightTop + 2]);
+            Vector3f C = new Vector3f(vertices[positionLeftBottom], vertices[positionLeftBottom + 1], vertices[positionLeftBottom + 2]);
+            if (new Vector2f(x, z).sub(new Vector2f(vertices[positionLeftTop], vertices[positionLeftTop + 2])).length() <
+                    new Vector2f(x, z).sub(new Vector2f(vertices[positionRightBottom], vertices[positionRightBottom + 2])).length()) {
+                Vector3f B = new Vector3f(vertices[positionLeftTop], vertices[positionLeftTop + 1], vertices[positionLeftTop + 2]);
+                float xsFactor = (B.y - A.y) * (C.z - A.z) - (B.z - A.z) * (C.y - A.y);
+                float ysFactor = -((B.x - A.x) * (C.z - A.z) - (B.z - A.z) * (C.x - A.x));
+                float zsFactor = (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x);
+                float D = -A.x * xsFactor - A.y * ysFactor - A.z * zsFactor;
+                return (-xsFactor * x - zsFactor * z - D) / ysFactor;
             } else {
-                yTop = vertices[positionLeftBottom]
-                        - (vertices[positionLeftBottom] - vertices[positionRightTop]) * mapModX;
-                yBottom = yTop;
+                Vector3f B = new Vector3f(vertices[positionRightBottom], vertices[positionRightBottom + 1], vertices[positionRightBottom + 2]);
+                float xsFactor = (B.y - A.y) * (C.z - A.z) - (B.z - A.z) * (C.y - A.y);
+                float ysFactor = -((B.x - A.x) * (C.z - A.z) - (B.z - A.z) * (C.x - A.x));
+                float zsFactor = (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x);
+                float D = -A.x * xsFactor - A.y * ysFactor - A.z * zsFactor;
+                return (-xsFactor * x - zsFactor * z - D) / ysFactor;
             }
-            return yTop - (yTop - yBottom) * mapModZ;
         } catch (IndexOutOfBoundsException e) {
             return 0;
         }

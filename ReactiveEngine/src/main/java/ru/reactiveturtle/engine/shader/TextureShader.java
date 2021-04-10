@@ -5,8 +5,9 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
-import ru.reactiveturtle.engine.base.GameContext;
+import ru.reactiveturtle.engine.base.Stage;
 import ru.reactiveturtle.engine.camera.Camera;
+import ru.reactiveturtle.engine.camera.PerspectiveCamera;
 import ru.reactiveturtle.engine.light.DirectionalLight;
 import ru.reactiveturtle.engine.light.Light;
 import ru.reactiveturtle.engine.light.PointLight;
@@ -140,31 +141,31 @@ public class TextureShader extends Shader {
     }
 
     @Override
-    public void load(Matrix4f modelMatrix, Mesh mesh) {
+    public void load(Stage stage, Matrix4f model, Mesh mesh) {
         Material material = mesh.getMaterial();
 
         super.loadIntUniform(textureSamplerLocation, 0);
         super.loadIntUniform(normalMapLocation, 1);
 
-        if (GameContext.camera != null) {
-            super.loadMatrix4fUniform(projectionLocation, GameContext.camera.getProjectionMatrix());
-            super.loadMatrix4fUniform(viewMatrixLocation, GameContext.camera.getViewMatrix());
+        if (stage.getCamera() != null) {
+            super.loadMatrix4fUniform(projectionLocation, stage.getCamera().getPerspectiveMatrix());
+            super.loadMatrix4fUniform(viewMatrixLocation, stage.getCamera().getViewMatrix());
         }
 
-        super.loadMatrix4fUniform(modelMatrixLocation, modelMatrix);
+        super.loadMatrix4fUniform(modelMatrixLocation, model);
 
         super.loadIntUniform(materialExistsLocation, material == null ? 0 : 1);
 
         if (material != null) {
 
             Vector3f translation = new Vector3f();
-            modelMatrix.getTranslation(translation);
+            model.getTranslation(translation);
 
-            DirectionalLight[] directionalLights = Light.getDirectionalLights(GameContext.lights);
+            DirectionalLight[] directionalLights = Light.getDirectionalLights(stage.getLights());
 
-            PointLight[] nearestPointLights = Light.getNearestPointLights(GameContext.lights, translation);
+            PointLight[] nearestPointLights = Light.getNearestPointLights(stage.getLights(), translation);
 
-            SpotLight[] nearestSpotLights = Light.getNearestSpotLights(GameContext.lights, translation);
+            SpotLight[] nearestSpotLights = Light.getNearestSpotLights(stage.getLights(), translation);
 
             if (directionalLights.length > 0 || nearestPointLights.length > 0 || nearestSpotLights.length > 0) {
                 setupMaterial(material);
@@ -172,7 +173,7 @@ public class TextureShader extends Shader {
                 super.loadIntUniform(directionalLightsCountLocation, directionalLights.length);
                 if (directionalLights.length > 0) {
                     for (int i = 0; i < directionalLights.length; i++) {
-                        setupDirectionalLight(modelMatrix, directionalLights[i], i);
+                        setupDirectionalLight(stage.getCamera(), model, directionalLights[i], i);
                     }
                 }
 
@@ -189,8 +190,8 @@ public class TextureShader extends Shader {
                         setupSpotLights(nearestSpotLights[i], i);
                     }
                 }
-                super.loadMatrix3fUniform(normalMatrixLocation, new Matrix3f(new Matrix4f().set(modelMatrix).invert()).transpose());
-                super.loadVector3fUniform(cameraPositionLocation, GameContext.camera.getPosition());
+                super.loadMatrix3fUniform(normalMatrixLocation, new Matrix3f(new Matrix4f().set(model).invert()).transpose());
+                super.loadVector3fUniform(cameraPositionLocation, stage.getCamera().getPosition());
             } else {
                 super.loadIntUniform(materialExistsLocation, 0);
             }
@@ -206,7 +207,7 @@ public class TextureShader extends Shader {
         super.loadFloatUniform(materialReflectanceLocation, material.getReflectance());
     }
 
-    private void setupDirectionalLight(Matrix4f modelMatrix, DirectionalLight directionalLight, int index) {
+    private void setupDirectionalLight(PerspectiveCamera camera, Matrix4f modelMatrix, DirectionalLight directionalLight, int index) {
         super.loadVector4fUniform(directionalLightDirectionLocations[index], new Vector4f(directionalLight.getDirection(), 0));
         super.loadVector4fUniform(directionalLightAmbientLocations[index], new Vector4f(directionalLight.getAmbient(), 1));
         super.loadVector4fUniform(directionalLightDiffuseLocations[index], new Vector4f(directionalLight.getDiffuse(), 1));
@@ -220,7 +221,7 @@ public class TextureShader extends Shader {
         super.loadMatrix4fUniform(modelLightViewProjectionMatrixLocation[index],
                 Camera.getOrtho()
                         .mul(lightViewMatrix)
-                        .mul(GameContext.camera.getFlatTranslationMatrix())
+                        .mul(camera.getFlatTranslationMatrix())
                         .mul(modelMatrix));
     }
 

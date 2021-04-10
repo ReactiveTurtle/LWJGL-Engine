@@ -1,9 +1,11 @@
 package ru.reactiveturtle.game.player;
 
 import ru.reactiveturtle.engine.base.GameContext;
+import ru.reactiveturtle.engine.base.Stage;
 import ru.reactiveturtle.engine.base2d.Square;
 import ru.reactiveturtle.engine.base2d.SquareShader;
 import ru.reactiveturtle.engine.material.Texture;
+import ru.reactiveturtle.game.base.Entity;
 import ru.reactiveturtle.game.types.Collectable;
 import ru.reactiveturtle.game.types.Container;
 import ru.reactiveturtle.game.types.Destructible;
@@ -45,7 +47,7 @@ public class Interface {
 
     private SquareShader squareShader;
 
-    public Interface() {
+    public Interface(float aspectRatio) {
         squareShader = new SquareShader();
         healthImage = new BufferedImage(256, 16, BufferedImage.TYPE_INT_ARGB);
         healthDrawer = healthImage.createGraphics();
@@ -56,14 +58,14 @@ public class Interface {
         health = new Square(0.3f, 0.01875f,
                 new Texture(healthImage),
                 1f, 1f);
-        health.setPosition(-1f * GameContext.getAspectRatio() + health.getWidth() * 1.2f, -1f + health.getHeight() + health.getWidth() * 0.2f, 0);
+        health.setPosition(-1f * aspectRatio + health.getWidth() * 1.2f, -1f + health.getHeight() + health.getWidth() * 0.2f, 0);
         health.setShader(squareShader);
 
         BufferedImage image = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics = image.createGraphics();
         graphics.setColor(Color.WHITE);
         graphics.fillOval(0, 0, 256, 256);
-        center = new Square(0.015f, 0.015f, new Texture(image), 1f, 1f);
+        center = new Square(0.0125f, 0.0125f, new Texture(image), 1f, 1f);
         center.setShader(squareShader);
 
         logImage = new BufferedImage(512, 512, BufferedImage.TYPE_INT_ARGB);
@@ -73,7 +75,7 @@ public class Interface {
         font = font.deriveFont(Font.PLAIN);
         logDrawer.setFont(font);
         log = new Square(1f, 1f, new Texture(logImage), 1f, 1f);
-        log.setPosition(-1f * GameContext.getAspectRatio() + log.getWidth(), 1f - log.getHeight(), 0);
+        log.setPosition(-1f * aspectRatio + log.getWidth(), 1f - log.getHeight(), 0);
         log.setShader(squareShader);
 
         inventoryBase = new BufferedImage(512, 64, BufferedImage.TYPE_INT_ARGB);
@@ -108,25 +110,25 @@ public class Interface {
             needsHungerIcon = ImageIO.read(new File(GameContext.RESOURCE_PATH + "/texture/hunger.png"));
             needs = new Square(0.2f, 0.1f, new Texture(needsImage), 1f, 1f);
             needs.setShader(squareShader);
-            needs.setPosition(-1f * GameContext.getAspectRatio() + needs.getWidth() + health.getWidth() * 0.2f,
+            needs.setPosition(-1f * aspectRatio + needs.getWidth() + health.getWidth() * 0.2f,
                     -1f + needs.getHeight() + health.getWidth() * 0.2f + health.getHeight() * 4f, 0);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void render(double deltaTime) {
+    public void render(Stage stage, double deltaTime) {
         boolean isDepthTestEnabled = glIsEnabled(GL_DEPTH_TEST);
         if (isDepthTestEnabled) {
             glDisable(GL_DEPTH_TEST);
         }
         squareShader.bind();
-        health.draw();
-        center.draw();
-        log.draw();
-        inventory.draw();
-        takeNotification.draw();
-        needs.draw();
+        health.draw(stage);
+        center.draw(stage);
+        log.draw(stage);
+        inventory.draw(stage);
+        takeNotification.draw(stage);
+        needs.draw(stage);
         squareShader.unbind();
         if (isDepthTestEnabled) {
             glEnable(GL_DEPTH_TEST);
@@ -149,20 +151,20 @@ public class Interface {
         return b;
     }
 
-    public void notify(GameObject gameObject) {
+    public void notify(Entity entity) {
         clearDrawer(takeNotificationDrawer, takeNotificationImage.getWidth(), takeNotificationImage.getHeight());
-        if (gameObject != null) {
-            takeNotificationDrawer.drawString(gameObject.name,
-                    getXCenterLocation(takeNotificationDrawer, takeNotificationImage.getWidth(), gameObject.name),
+        if (entity != null) {
+            takeNotificationDrawer.drawString(entity.getName(),
+                    getXCenterLocation(takeNotificationDrawer, takeNotificationImage.getWidth(), entity.getName()),
                     24);
             String secondLine = null;
-            if (gameObject instanceof Collectable && gameObject.name.length() > 0) {
+            if (entity instanceof Collectable && entity.getName().length() > 0) {
                 secondLine = "Press E";
-            } else if (gameObject instanceof Destructible) {
-                secondLine = ((Destructible) gameObject).getStrength() + " %";
-            } else if (gameObject instanceof Container) {
-                if (gameObject instanceof Firebox) {
-                    secondLine = "Time: " + toNormalTime(((Firebox) gameObject).getBurningTime());
+            } else if (entity instanceof Destructible) {
+                secondLine = ((Destructible) entity).getStrength() + " %";
+            } else if (entity instanceof Container) {
+                if (entity instanceof Firebox) {
+                    secondLine = "Time: " + toNormalTime(((Firebox) entity).getBurningTime());
                 }
             }
             if (secondLine != null) {

@@ -2,14 +2,14 @@ package ru.reactiveturtle.physics;
 
 import org.joml.Vector3f;
 
-public abstract class RigidBody extends Transform3D implements Cloneable{
+public abstract class RigidBody extends Transform3D implements Cloneable {
     public String log;
     protected Vector3f translation = new Vector3f();
 
     float flyTime = 0;
-    float upTime = 0;
+    float startYVelocity = 0;
+    float startFlyY = 0;
     float lastY = 0;
-    float fallStart = 0;
 
     private Integer id = null;
     public String tag = "body";
@@ -39,9 +39,10 @@ public abstract class RigidBody extends Transform3D implements Cloneable{
     }
 
     public void setUpHeight(float height) {
-        upTime = (float) Math.sqrt(2 * height / 9.8f);
-        fallStart = getY();
-        lastY = fallStart;
+        startYVelocity = (float) Math.sqrt(2 * 9.8f * height);
+        flyTime = 0;
+        startFlyY = getY();
+        lastY = getY();
     }
 
     public RigidBody copy() {

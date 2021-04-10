@@ -1,7 +1,7 @@
 package ru.reactiveturtle.game.world;
 
 import org.joml.Vector3f;
-import ru.reactiveturtle.game.player.GameObject;
+import ru.reactiveturtle.game.base.Entity;
 import ru.reactiveturtle.physics.PlaneBody;
 import ru.reactiveturtle.physics.RigidBody;
 import ru.reactiveturtle.physics.World;
@@ -13,14 +13,6 @@ public class Physic {
         world = new World(new Vector3f(0, 9.8f, 0));
         PlaneBody planeBody = new PlaneBody(new Vector3f(0f, 1f, 0f));
         world.addRigidBodies(planeBody);
-    }
-
-    public void putObjects(GameObject... objects) {
-        for (GameObject object : objects) {
-            if (object.getRigidBody() != null) {
-                world.addRigidBodies(object.getRigidBody());
-            }
-        }
     }
 
     public void putBody(RigidBody rigidBody) {

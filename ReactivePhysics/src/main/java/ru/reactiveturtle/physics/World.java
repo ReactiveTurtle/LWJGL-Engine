@@ -32,19 +32,9 @@ public class World {
             RigidBody first = rigidBodies.get(i);
             if (first.getType() != RigidBody.Type.STATIC) {
                 first.flyTime += deltaTime;
-                if (first.upTime > 0) {
-                    if (first.flyTime < first.upTime) {
-                        float yTranslation = 9.8f * (first.upTime - first.flyTime) / 2 - first.lastY;
-                        first.translation.add(0, yTranslation, 0);
-                    } else {
-                        first.flyTime = first.flyTime % first.upTime;
-                        first.upTime = 0;
-                        first.fallStart = first.getY();
-                    }
-                }
-                if (first.upTime == 0) {
-                    first.translation.y = (first.fallStart - 9.8f * (first.flyTime) / 2) - first.lastY;
-                }
+                float yTranslation = (first.startFlyY + first.startYVelocity * first.flyTime +
+                        (-9.8f * first.flyTime * first.flyTime / 2)) - first.lastY;
+                first.translation.add(0, yTranslation, 0);
                 CollisionResult collisionResult = rigidBodyCollisions.get(i);
                 for (int j = 0; j < rigidBodies.size(); j++) {
                     if (i != j) {
@@ -59,9 +49,9 @@ public class World {
                 }
                 rigidBodyCollisions.set(i, collisionResult);
                 if (rigidBodyCollisions.get(i).isYCollide()) {
-                    first.upTime = 0;
+                    first.startYVelocity = 0;
                     first.flyTime = 0;
-                    first.fallStart = first.getY();
+                    first.startFlyY = first.getY();
                 }
             }
         }
@@ -78,7 +68,6 @@ public class World {
                     + rigidBody.translation.x + ", "
                     + rigidBody.translation.y + ", "
                     + rigidBody.translation.z + ", ";
-            System.out.println(rigidBody.log);
             rigidBody.translation.set(0);
         }
     }

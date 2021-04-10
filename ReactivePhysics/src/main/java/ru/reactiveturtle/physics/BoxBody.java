@@ -36,7 +36,17 @@ public class BoxBody extends RigidBody {
             0, 1, 0,
             0, -1, 0
     };
+
+    public float[] getBoxDefaultNormals() {
+        return boxDefaultNormals;
+    }
+
     protected final float[] boxDefaultNormalPoints = new float[18];
+
+    public float[] getBoxDefaultNormalPoints() {
+        return boxDefaultNormalPoints;
+    }
+
     protected float[] boxDefaultNormalRotatedPoints = new float[18];
 
     private void initBox(float width, float height, float depth,
@@ -103,7 +113,11 @@ public class BoxBody extends RigidBody {
     }
 
     public float[] getBoxNormals() {
-        return boxNormals;
+        return Arrays.copyOf(boxNormals, boxNormals.length);
+    }
+
+    public float[] getBoxNormalPoints() {
+        return Arrays.copyOf(boxNormalPoints, boxNormalPoints.length);
     }
 
     private void createBox() {
@@ -175,6 +189,10 @@ public class BoxBody extends RigidBody {
         createBox();
     }
 
+    public Vector3f getCenter() {
+        return center;
+    }
+
     public int getPointsCount() {
         return 8;
     }
@@ -203,14 +221,23 @@ public class BoxBody extends RigidBody {
         if (rigidBody instanceof HeightMap) {
             HeightMap heightMap = (HeightMap) rigidBody;
             float y = heightMap.getY(position.x, position.z);
-            float currentY = new Vector3f(position).add(center).y;
+            float currentY = position.y + center.y;
             boolean isCollide = false;
-            if (currentY < y) {
-                translation.y = y - currentY;
-                if (translation.y < 0) {
-                    translation.y = 0;
+            float yTranslation = 0;
+            for (int i = 0; i < testCount + 1 && !isCollide; i++) {
+                isCollide = currentY + translation.y * i / testCount < y;
+                if (!isCollide) {
+                    yTranslation = translation.y * i / testCount;
                 }
-                isCollide = true;
+            }
+            if (currentY <= y) {
+                yTranslation = y - currentY;
+                if (startFlyY == 0) {
+                    isCollide = false;
+                }
+            }
+            if (isCollide) {
+                translation.y = yTranslation;
             }
             return new CollisionResult(false, isCollide, false);
         }
