@@ -22,8 +22,7 @@ public class DragunovSniperRifle extends Weapon {
             model.getMeshes().values().iterator().next().getMaterial()
                     .setTexture(new Texture("object/weapon/DSR.bmp"));
             model.setScale(0.625f);
-            //BoxBody boxBody = new BoxBody(new Vector3f(2.25f, 0.8f, 0.15f));
-            BoxBody boxBody = new BoxBody(new Vector3f(5f, 5f, 5f));
+            BoxBody boxBody = new BoxBody(new Vector3f(2.25f, 0.8f, 0.15f));
             boxBody.setCenter(new Vector3f(-0.6f, 0f, 0));
             boxBody.setRotationX((float) (Math.PI / 4));
             boxBody.setType(RigidBody.Type.DYNAMIC);

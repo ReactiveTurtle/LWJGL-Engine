@@ -2,14 +2,14 @@ package ru.reactiveturtle.engine.particle;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import ru.reactiveturtle.engine.base.Stage;
+import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.base2d.Square;
 import ru.reactiveturtle.engine.model.mesh.Mesh;
 import ru.reactiveturtle.engine.material.Texture;
 
 import static org.lwjgl.opengl.GL11.*;
 
-public class Particle implements Cloneable{
+public class Particle implements Cloneable {
     private ParticleInfo particleInfo;
     private ParticleShader shader;
     private Mesh mesh;
@@ -47,7 +47,7 @@ public class Particle implements Cloneable{
                 .scale(particleInfo.getScale());
     }
 
-    public void draw(Stage stage, float alpha) {
+    public void draw(Stage3D stage, float alpha) {
         shader.bind();
         glDepthMask(false);
         glEnable(GL_BLEND);

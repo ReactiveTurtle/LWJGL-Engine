@@ -5,7 +5,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
-import ru.reactiveturtle.engine.base.Stage;
+import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.camera.Camera;
 import ru.reactiveturtle.engine.camera.PerspectiveCamera;
 import ru.reactiveturtle.engine.light.DirectionalLight;
@@ -141,7 +141,7 @@ public class TextureShader extends Shader {
     }
 
     @Override
-    public void load(Stage stage, Matrix4f model, Mesh mesh) {
+    public void load(Stage3D stage, Matrix4f model, Mesh mesh) {
         Material material = mesh.getMaterial();
 
         super.loadIntUniform(textureSamplerLocation, 0);

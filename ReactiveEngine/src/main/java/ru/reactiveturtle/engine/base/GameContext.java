@@ -10,8 +10,9 @@ import org.lwjgl.glfw.GLFWWindowFocusCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryStack;
-import ru.reactiveturtle.engine.camera.PerspectiveCamera;
+import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.base.control.CursorCallback;
+import ru.reactiveturtle.engine.model.Disposeable;
 import ru.reactiveturtle.engine.shadow.ShadowManager;
 
 import java.nio.DoubleBuffer;
@@ -23,13 +24,19 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-public abstract class GameContext {
+/**
+ * Игровой контекст. Здесь стартует игра.
+ * Контекст содержит всю основную информацию об окне игры.
+ * Унаследуйте какой-либо класс от этого класса.
+ * Чтобы запустить игру вызовите метод start().
+ */
+public abstract class GameContext implements Disposeable {
     public static final String ENGINE_RESOURCE_PATH = "ReactiveEngine/src/main/resources/";
     public static final String RESOURCE_PATH = "src/main/resources/";
 
     protected abstract void run();
 
-    protected void destroy() {
+    public void dispose() {
         mShadowManager.setShadowEnabled(false);
         mShadowManager.release();
     }
@@ -48,6 +55,11 @@ public abstract class GameContext {
     private double lastTime;
     private double deltaTime;
 
+    /**
+     * Метод отвечает за запуск окна игры и последующий рендеринг
+     * @param isWindowResizable - Означает можно ли менять размер окна
+     * @param isCursorCenter - Означает центрировать ли мышку постоянно при рендеринге
+     */
     public void start(boolean isWindowResizable, boolean isCursorCenter) {
         this.isCursorCenter = isCursorCenter;
         System.out.println("LWJGL version - " + Version.getVersion());
@@ -151,6 +163,7 @@ public abstract class GameContext {
                 lastTime = glfwGetTime();
                 if (stage != null) {
                     stage.render();
+                    stage.renderables.forEach(e -> e.render(stage));
                 }
                 glfwSwapBuffers(windowId);
 
@@ -173,7 +186,7 @@ public abstract class GameContext {
                 glfwWaitEvents();
             }
         }
-        destroy();
+        dispose();
     }
 
     public void setFullscreen(boolean isFullscreen) {
@@ -215,14 +228,14 @@ public abstract class GameContext {
         return windowId;
     }
 
-    private Stage stage = null;
+    private Stage3D stage = null;
 
-    public void setStage(Stage stage) {
+    public void setStage(Stage3D stage) {
         this.stage = stage;
         updateKeyCallback();
     }
 
-    public Stage getStage() {
+    public Stage3D getStage() {
         return stage;
     }
 

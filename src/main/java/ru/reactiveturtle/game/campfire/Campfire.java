@@ -1,8 +1,7 @@
 package ru.reactiveturtle.game.campfire;
 
 import org.joml.Vector3f;
-import ru.reactiveturtle.engine.base.GameContext;
-import ru.reactiveturtle.engine.base.Stage;
+import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.light.PointLight;
 import ru.reactiveturtle.engine.model.Model;
 import ru.reactiveturtle.engine.model.loader.ObjLoader;
@@ -42,13 +41,13 @@ public class Campfire extends Entity implements Firebox {
     }
 
     @Override
-    public void renderShadow(Stage stage) {
+    public void renderShadow(Stage3D stage) {
         mStone.renderShadow(stage);
         mFirewood.renderShadow(stage);
     }
 
     @Override
-    public void render(Stage stage) {
+    public void render(Stage3D stage) {
         mStone.render(stage);
         mFirewood.render(stage);
         if (mFlame.isActive()) {

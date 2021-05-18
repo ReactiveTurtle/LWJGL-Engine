@@ -1,4 +1,4 @@
-package ru.reactiveturtle.game.player;
+package ru.reactiveturtle.game.player.inventory;
 
 
 import ru.reactiveturtle.game.types.Collectable;

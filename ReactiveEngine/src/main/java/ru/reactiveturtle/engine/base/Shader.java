@@ -7,6 +7,9 @@ import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
+import ru.reactiveturtle.engine.base3d.Stage3D;
+import ru.reactiveturtle.engine.exceptions.ObjectDisposedException;
+import ru.reactiveturtle.engine.model.Disposeable;
 import ru.reactiveturtle.engine.model.mesh.Mesh;
 
 import java.io.BufferedReader;
@@ -17,7 +20,7 @@ import java.nio.FloatBuffer;
 
 import static org.lwjgl.opengl.GL20.*;
 
-public abstract class Shader {
+public abstract class Shader implements Disposeable {
     protected static final String SQUARE_VERTEX_SHADER = GameContext.ENGINE_RESOURCE_PATH + "shader/square_vertex_shader.glsl";
     protected static final String SQUARE_FRAGMENT_SHADER = GameContext.ENGINE_RESOURCE_PATH + "shader/square_fragment_shader.glsl";
     protected static final String PARTICLE_VERTEX_SHADER = GameContext.ENGINE_RESOURCE_PATH + "shader/particle_vertex_shader.glsl";
@@ -35,7 +38,7 @@ public abstract class Shader {
 
     private String vertexShaderFile, fragmentShaderFile;
 
-    protected boolean isBinded = false;
+    protected boolean isBind = false;
 
     protected Shader(String vertexShaderFile, String fragmentShaderFile) {
         programID = glCreateProgram();
@@ -47,7 +50,38 @@ public abstract class Shader {
         this.fragmentShaderFile = fragmentShaderFile;
     }
 
-    public void create() {
+    public abstract void bindAllAttributes();
+
+    public abstract void getAllUniforms();
+
+    public abstract void load(Stage3D stage, Matrix4f model, Mesh mesh);
+
+    public void bind() {
+        if (!isBind) {
+            glUseProgram(programID);
+            isBind = true;
+        }
+    }
+
+    public void unbind() {
+        if (isBind) {
+            glUseProgram(0);
+            isBind = false;
+        }
+    }
+
+    public boolean isBind() {
+        return isBind;
+    }
+
+    public void dispose() {
+        unbind();
+        if (programID != 0) {
+            glDeleteProgram(programID);
+        }
+    }
+
+    protected void create() {
         createVertexShader();
         createFragmentShader();
 
@@ -56,6 +90,60 @@ public abstract class Shader {
         link();
 
         getAllUniforms();
+    }
+
+    protected void bindAttribute(int index, String varName) {
+        GL20.glBindAttribLocation(programID, index, varName);
+    }
+
+    protected int getUniform(String name) {
+        return GL20.glGetUniformLocation(programID, name);
+    }
+
+    protected void loadIntUniform(int location, int value) {
+        glUniform1i(location, value);
+    }
+
+    protected void loadFloatUniform(int location, float value) {
+        glUniform1f(location, value);
+    }
+
+    protected void loadFloatArrayUniform(int location, float[] values) {
+        glUniform1fv(location, values);
+    }
+
+    protected void loadVector3fUniform(int location, Vector3f value) {
+        glUniform3f(location, value.x, value.y, value.z);
+    }
+
+    protected void loadVector3fArrayUniform(int location, Vector3f[] values) {
+        float[] buffer = new float[values.length * 3];
+        for (int i = 0; i < buffer.length; i += 3) {
+            Vector3f vector3f = values[(i - i % 3) / 3];
+            buffer[i] = vector3f.x;
+            buffer[i + 1] = vector3f.y;
+            buffer[i + 2] = vector3f.z;
+
+        }
+        glUniform3fv(location, buffer);
+    }
+
+    protected void loadVector4fUniform(int location, Vector4f value) {
+        glUniform4f(location, value.x, value.y, value.z, value.w);
+    }
+
+    protected void loadMatrix3fUniform(int location, Matrix3f matrix3f) {
+        FloatBuffer buffer = BufferUtils.createFloatBuffer(9);
+        matrix3f.get(buffer);
+        glUniformMatrix3fv(location, false, buffer);
+        buffer.flip();
+    }
+
+    protected void loadMatrix4fUniform(int location, Matrix4f matrix4f) {
+        FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
+        matrix4f.get(buffer);
+        glUniformMatrix4fv(location, false, buffer);
+        buffer.flip();
     }
 
     private void createVertexShader() {
@@ -111,87 +199,6 @@ public abstract class Shader {
             System.exit(-1);
         }
     }
-
-    public void bind() {
-        if (!isBinded) {
-            glUseProgram(programID);
-            isBinded = true;
-        }
-    }
-
-    public void unbind() {
-        if (isBinded) {
-            glUseProgram(0);
-            isBinded = false;
-        }
-    }
-
-    public void clear() {
-        unbind();
-        if (programID != 0) {
-            glDeleteProgram(programID);
-        }
-    }
-
-    public abstract void bindAllAttributes();
-
-    protected void bindAttribute(int index, String varName) {
-        GL20.glBindAttribLocation(programID, index, varName);
-    }
-
-    public abstract void getAllUniforms();
-
-    protected int getUniform(String name) {
-        return GL20.glGetUniformLocation(programID, name);
-    }
-
-    protected void loadIntUniform(int location, int value) {
-        glUniform1i(location, value);
-    }
-
-    protected void loadFloatUniform(int location, float value) {
-        glUniform1f(location, value);
-    }
-
-    void loadFloatArrayUniform(int location, float[] values) {
-        glUniform1fv(location, values);
-    }
-
-    protected void loadVector3fUniform(int location, Vector3f value) {
-        glUniform3f(location, value.x, value.y, value.z);
-    }
-
-    void loadVector3fArrayUniform(int location, Vector3f[] values) {
-        float[] buffer = new float[values.length * 3];
-        for (int i = 0; i < buffer.length; i += 3) {
-            Vector3f vector3f = values[(i - i % 3) / 3];
-            buffer[i] = vector3f.x;
-            buffer[i + 1] = vector3f.y;
-            buffer[i + 2] = vector3f.z;
-
-        }
-        glUniform3fv(location, buffer);
-    }
-
-    protected void loadVector4fUniform(int location, Vector4f value) {
-        glUniform4f(location, value.x, value.y, value.z, value.w);
-    }
-
-    protected void loadMatrix3fUniform(int location, Matrix3f matrix3f) {
-        FloatBuffer buffer = BufferUtils.createFloatBuffer(9);
-        matrix3f.get(buffer);
-        glUniformMatrix3fv(location, false, buffer);
-        buffer.flip();
-    }
-
-    protected void loadMatrix4fUniform(int location, Matrix4f matrix4f) {
-        FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
-        matrix4f.get(buffer);
-        glUniformMatrix4fv(location, false, buffer);
-        buffer.flip();
-    }
-
-    public abstract void load(Stage stage, Matrix4f model, Mesh mesh);
 
     private String readFile(String file) {
         StringBuilder string = new StringBuilder();

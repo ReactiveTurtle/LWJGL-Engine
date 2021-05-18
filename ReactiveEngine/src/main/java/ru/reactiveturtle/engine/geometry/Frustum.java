@@ -3,10 +3,8 @@ package ru.reactiveturtle.engine.geometry;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import ru.reactiveturtle.engine.base.Shader;
-import ru.reactiveturtle.engine.base.Stage;
+import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.camera.PerspectiveCamera;
-
-import java.util.Arrays;
 
 public class Frustum {
     private final Plane[] planes = new Plane[6];
@@ -55,7 +53,7 @@ public class Frustum {
     /**
      * For debugging
      **/
-    public void render(Stage stage, Shader textureShader) {
+    public void render(Stage3D stage, Shader textureShader) {
         for (Plane plane : planes) {
             if (plane == null) continue;
             plane.render(stage, textureShader);

@@ -1,8 +1,7 @@
 package ru.reactiveturtle.engine.model;
 
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import ru.reactiveturtle.engine.base.Stage;
+import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.base.Transform3D;
 import ru.reactiveturtle.engine.model.mesh.Mesh;
 import ru.reactiveturtle.engine.base.Shader;
@@ -11,8 +10,7 @@ import ru.reactiveturtle.engine.shadow.Shadow;
 
 import java.util.HashMap;
 
-public class Model extends Transform3D implements Shadow, Renderable, Releasable {
-    private final Vector3f scale = new Vector3f(1f, 1f, 1f);
+public class Model extends Transform3D implements Shadow, Renderable<Stage3D>, Disposeable {
 
     protected HashMap<String, Mesh> meshes = new HashMap<>();
 
@@ -42,7 +40,7 @@ public class Model extends Transform3D implements Shadow, Renderable, Releasable
     }
 
     @Override
-    public void renderShadow(Stage stage) {
+    public void renderShadow(Stage3D stage) {
         if (stage.getGameContext().getShadowManager().isShadowEnabled()) {
             for (Mesh mesh : meshes.values()) {
                 mesh.renderShadow(stage, getModelMatrix());
@@ -51,46 +49,12 @@ public class Model extends Transform3D implements Shadow, Renderable, Releasable
     }
 
     @Override
-    public void render(Stage stage) {
+    public void render(Stage3D stage) {
         shader.bind();
         for (Mesh mesh : meshes.values()) {
             mesh.render(stage, shader, getModelMatrix());
         }
         shader.unbind();
-    }
-
-    public void setScale(float scale) {
-        this.scale.x = scale;
-        this.scale.y = scale;
-        this.scale.z = scale;
-    }
-
-    public void setScale(Vector3f scale) {
-        scale.set(scale.x, scale.y, scale.z);
-    }
-
-    public void setScale(float scaleX, float scaleY, float scaleZ) {
-        scale.set(scaleX, scaleY, scaleZ);
-    }
-
-    public void setScaleX(float scaleX) {
-        scale.x = scaleX;
-    }
-
-    public void setScaleY(float scaleY) {
-        scale.y = scaleY;
-    }
-
-    public Vector3f getScale() {
-        return scale;
-    }
-
-    public float getScaleX() {
-        return scale.x;
-    }
-
-    public float getScaleY() {
-        return scale.y;
     }
 
     public void setMaterial(Material material) {
@@ -104,9 +68,9 @@ public class Model extends Transform3D implements Shadow, Renderable, Releasable
     }
 
     @Override
-    public void release() {
+    public void dispose() {
         for (Mesh mesh : meshes.values()) {
-            mesh.destroy();
+            mesh.dispose();
         }
     }
 }

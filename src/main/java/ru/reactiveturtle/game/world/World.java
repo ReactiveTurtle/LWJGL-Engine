@@ -2,18 +2,18 @@ package ru.reactiveturtle.game.world;
 
 import org.joml.Vector3f;
 import ru.reactiveturtle.engine.base.GameContext;
-import ru.reactiveturtle.engine.base.Stage;
+import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.camera.PerspectiveCamera;
 import ru.reactiveturtle.engine.material.Material;
 import ru.reactiveturtle.engine.material.Texture;
 import ru.reactiveturtle.engine.model.base.Sphere;
 import ru.reactiveturtle.engine.module.moving.MovingModule;
 import ru.reactiveturtle.engine.shader.TextureShader;
+import ru.reactiveturtle.engine.ui.Label;
+import ru.reactiveturtle.game.base.Entity;
 import ru.reactiveturtle.game.player.Player;
 import ru.reactiveturtle.game.player.PlayerMovingModule;
-import ru.reactiveturtle.physics.BoxBody;
 import ru.reactiveturtle.physics.HeightMap;
-import ru.reactiveturtle.physics.RigidBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
-public class World extends Stage {
+public class World extends Stage3D {
     private MovingModule playerMovingModule;
 
     private DayNight dayNight;
@@ -34,15 +34,18 @@ public class World extends Stage {
     private List<Chunk> chunks = new ArrayList<>();
     private LootMap lootMap;
 
+    private Sun sun;
     private Sphere sphere;
 
     public World(GameContext gameContext) {
         super(gameContext);
     }
 
+    private Label label, intersectionLabel;
+
     @Override
     public void start() {
-        setCamera(new PerspectiveCamera(getGameContext().getAspectRatio(), 67f, 0.1f, 10000f));
+        setCamera(new PerspectiveCamera(getGameContext().getAspectRatio(), 67f, 0.01f, 10000f));
         dayNight = new DayNight();
         physic = new Physic();
         player = new Player(getGameContext().getAspectRatio());
@@ -99,17 +102,10 @@ public class World extends Stage {
         getGameContext().getShadowManager().setShadowEnabled(true);
 
         player = new Player(getGameContext().getAspectRatio());
-        BoxBody playerBoxBody = new BoxBody(0.5f, 1.85f, 0.5f);
-        player.setRigidBody(playerBoxBody);
-        playerBoxBody.setCenter(new Vector3f(0, -0.925f, 0));
-        player.getRigidBody().setY(10f);
-        player.getRigidBody().setZ(1);
-        player.getRigidBody().tag = "player";
-        player.getRigidBody().setType(RigidBody.Type.DYNAMIC);
-        physic.putBody(playerBoxBody);
+        physic.putBody(player.getRigidBody());
 
         player.setPosition(1f, 45f, 2f);
-        player.setRotationX(90);
+        player.setRotationX(0);
         player.setLockYMove(true);
         player.setLockTopBottomRotation(true);
         player.setActionListener(new Player.ActionListener() {
@@ -157,6 +153,32 @@ public class World extends Stage {
         sphereMaterial.setDiffuse(0.7f, 0.4f, 0.4f);
         sphere.setMaterial(sphereMaterial);
         sphere.setShader(textureShader);
+
+        sun = new Sun(textureShader);
+        sun.setPosition(0, 40, 0);
+
+        enableUI();
+        label = new Label(uiContext, 0.5f, 0.25f);
+        label.setFontSize(40);
+        label.setPosition(label.getWidth() - gameContext.getAspectRatio(), 1 - label.getHeight(), 0);
+        label.setBackground(0, 0, 0, 0x42);
+        uiContext.getUILayout().add(label);
+
+        intersectionLabel = new Label(uiContext, 1f, 0.25f);
+        intersectionLabel.setPosition(0, 0, 0);
+        intersectionLabel.setFontSize(40);
+        uiContext.getUILayout().add(intersectionLabel);
+        lootMap.setIntersectionListener(new LootMap.IntersectionListener() {
+            @Override
+            public void onIntersect(Entity entity, Float distance) {
+                intersectionLabel.setText(entity.getName() + ": " + Math.round(distance * 100) / 100f);
+            }
+
+            @Override
+            public void onNotIntersect() {
+                intersectionLabel.setText("");
+            }
+        });
     }
 
     @Override
@@ -186,7 +208,15 @@ public class World extends Stage {
             chunk.render(this);
         }
         lootMap.render(this);
+        sun.render(this);
         player.render(this, deltaTime);
         player.renderUI(this, deltaTime);
+
+        Vector3f playerPosition = player.getPosition();
+        playerPosition.x = Math.round(playerPosition.x * 10) / 10f;
+        playerPosition.y = Math.round(playerPosition.y * 10) / 10f;
+        playerPosition.z = Math.round(playerPosition.z * 10) / 10f;
+        label.setText("x: " + playerPosition.x + "\ny: " + playerPosition.y + "\nz: " + playerPosition.z);
+
     }
 }

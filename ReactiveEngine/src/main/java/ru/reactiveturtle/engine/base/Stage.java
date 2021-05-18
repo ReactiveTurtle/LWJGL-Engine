@@ -1,12 +1,13 @@
 package ru.reactiveturtle.engine.base;
 
-import ru.reactiveturtle.engine.camera.PerspectiveCamera;
-import ru.reactiveturtle.engine.light.Light;
 import ru.reactiveturtle.engine.model.Renderable;
+import ru.reactiveturtle.engine.toolkit.ReactiveList;
+import ru.reactiveturtle.engine.ui.UIContext;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * Базовая сцена. Содержит в себе контекст игры и функции
+ * обратной связи для периферийных устройств (клавиатура, мышь)
+ */
 public abstract class Stage {
     public Stage(GameContext gameContext) {
         this.gameContext = gameContext;
@@ -16,39 +17,15 @@ public abstract class Stage {
 
     public abstract void render();
 
-    private final GameContext gameContext;
+    protected final GameContext gameContext;
 
+    /**
+     * Returns game context
+     * @return GameContext
+     */
     public GameContext getGameContext() {
         return gameContext;
     }
-
-
-    private PerspectiveCamera camera;
-
-    public void setCamera(PerspectiveCamera camera) {
-        this.camera = camera;
-    }
-
-    public PerspectiveCamera getCamera() {
-        return camera;
-    }
-
-    public static List<Renderable> s = new ArrayList<>();
-
-    public static List<Light> lights = new ArrayList<>();
-
-    protected void addLight(Light light) {
-        lights.add(light);
-    }
-
-    protected void removeLight(int index) {
-        lights.remove(index);
-    }
-
-    public List<Light> getLights() {
-        return lights;
-    }
-
 
     protected KeyCallback keyCallback;
 
@@ -88,5 +65,12 @@ public abstract class Stage {
         public void onScroll(int direction) {
 
         }
+    }
+
+    protected ReactiveList<Renderable<Stage>> renderables = new ReactiveList<>();
+    protected UIContext uiContext;
+    public void enableUI() {
+        uiContext = new UIContext(gameContext);
+        renderables.add(uiContext);
     }
 }

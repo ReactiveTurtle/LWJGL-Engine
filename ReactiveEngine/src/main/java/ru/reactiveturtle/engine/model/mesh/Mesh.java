@@ -7,9 +7,9 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import ru.reactiveturtle.engine.base.Shader;
-import ru.reactiveturtle.engine.base.Stage;
+import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.material.Material;
-import ru.reactiveturtle.engine.shadow.ShadowShader;
+import ru.reactiveturtle.engine.model.Disposeable;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -17,7 +17,7 @@ import java.nio.IntBuffer;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL13.*;
 
-public class Mesh {
+public class Mesh implements Disposeable {
     private int vertexArrayId, vertexBufferId, vertexCount;
     private String key;
     private Integer indicesBufferId, textureCoordsBufferId, normalsBufferId;
@@ -25,6 +25,10 @@ public class Mesh {
     private Material material;
 
     public Mesh(String key, float[] vertices, int[] indices) {
+        create(key, vertices, indices);
+    }
+
+    private void create(String key, float[] vertices, int[] indices) {
         this.key = key;
 
         vertexArrayId = GL30.glGenVertexArrays();
@@ -37,7 +41,12 @@ public class Mesh {
         GL30.glBindVertexArray(0);
     }
 
-    public void renderShadow(Stage stage, Matrix4f modelMatrix) {
+    public void resize(String key, float[] vertices, int[] indices) {
+        dispose();
+        create(key, vertices, indices);
+    }
+
+    public void renderShadow(Stage3D stage, Matrix4f modelMatrix) {
         GL30.glBindVertexArray(vertexArrayId);
         GL20.glEnableVertexAttribArray(0);
 
@@ -48,54 +57,52 @@ public class Mesh {
         GL30.glBindVertexArray(0);
     }
 
-    public void render(Stage stage, Shader shader, Matrix4f modelMatrix) {
+    public void render(Stage3D stage, Shader shader, Matrix4f modelMatrix) {
+        if (!shader.isBind()) {
+            throw new IllegalStateException("Shader must be bind for correct rendering");
+        }
         GL30.glBindVertexArray(vertexArrayId);
         GL20.glEnableVertexAttribArray(0);
 
-        if (shader != null) {
-            if (material == null) {
-                GL20.glEnableVertexAttribArray(1);
-            } else if (textureCoordsBufferId != null) {
-                GL20.glEnableVertexAttribArray(2);
-                glActiveTexture(GL_TEXTURE0);
-                GL11.glBindTexture(GL_TEXTURE_2D, material.getTexture().getTextureId());
+        if (material == null) {
+            GL20.glEnableVertexAttribArray(1);
+        } else if (textureCoordsBufferId != null) {
+            GL20.glEnableVertexAttribArray(2);
+            glActiveTexture(GL_TEXTURE0);
+            GL11.glBindTexture(GL_TEXTURE_2D, material.getTexture().getTextureId());
+        }
+        if (material != null) {
+            if (material.getNormalMap() != null) {
+                glActiveTexture(GL_TEXTURE1);
+                GL11.glBindTexture(GL_TEXTURE_2D, material.getNormalMap().getTextureId());
+            } else if (normalsBufferId != null) {
+                GL20.glEnableVertexAttribArray(3);
             }
-            if (material != null) {
-                if (material.getNormalMap() != null) {
-                    glActiveTexture(GL_TEXTURE1);
-                    GL11.glBindTexture(GL_TEXTURE_2D, material.getNormalMap().getTextureId());
-                } else if (normalsBufferId != null) {
-                    GL20.glEnableVertexAttribArray(3);
-                }
-            }
-            glActiveTexture(GL_TEXTURE2);
-            if (stage.getLights().get(0).getShadowMap() != null) {
-                GL11.glBindTexture(GL_TEXTURE_2D, stage.getLights().get(0).getShadowMap().getShadowTexture().getTextureId());
-            }
+        }
+        glActiveTexture(GL_TEXTURE2);
+        if (stage.getLights().get(0).getShadowMap() != null) {
+            GL11.glBindTexture(GL_TEXTURE_2D, stage.getLights().get(0).getShadowMap().getShadowTexture().getTextureId());
         }
 
-        if (shader != null) {
-            shader.load(stage, modelMatrix, this);
-        }
+        shader.load(stage, modelMatrix, this);
 
         GL20.glDrawElements(GL11.GL_TRIANGLES, vertexCount, GL11.GL_UNSIGNED_INT, 0);
 
         GL20.glDisableVertexAttribArray(0);
-        if (shader != null) {
-            if (material == null)
-                GL20.glDisableVertexAttribArray(1);
-            else if (textureCoordsBufferId != null) {
-                GL20.glDisableVertexAttribArray(2);
-                GL11.glBindTexture(GL_TEXTURE_2D, 0);
-            }
-            if (material != null && normalsBufferId != null)
-                GL20.glDisableVertexAttribArray(3);
+        if (material == null)
+            GL20.glDisableVertexAttribArray(1);
+        else if (textureCoordsBufferId != null) {
+            GL20.glDisableVertexAttribArray(2);
+            GL11.glBindTexture(GL_TEXTURE_2D, 0);
         }
+        if (material != null && normalsBufferId != null)
+            GL20.glDisableVertexAttribArray(3);
 
         GL30.glBindVertexArray(0);
     }
 
-    public void destroy() {
+    @Override
+    public void dispose() {
         if (normalsBufferId != null) GL15.glDeleteBuffers(normalsBufferId);
         if (textureCoordsBufferId != null) GL15.glDeleteBuffers(textureCoordsBufferId);
         GL15.glDeleteBuffers(indicesBufferId);

@@ -2,6 +2,6 @@ package ru.reactiveturtle.engine.model;
 
 import ru.reactiveturtle.engine.base.Stage;
 
-public interface Renderable {
-    void render(Stage stage);
+public interface Renderable<T extends Stage> {
+    void render(T stage);
 }

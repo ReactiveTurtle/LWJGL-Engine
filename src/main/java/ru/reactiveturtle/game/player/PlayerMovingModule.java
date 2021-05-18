@@ -1,7 +1,7 @@
 package ru.reactiveturtle.game.player;
 
 import org.joml.Vector3f;
-import ru.reactiveturtle.engine.base.Stage;
+import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.camera.PerspectiveCamera;
 import ru.reactiveturtle.engine.module.moving.Movable;
 import ru.reactiveturtle.engine.module.moving.MovingModule;
@@ -10,9 +10,9 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
 
 public class PlayerMovingModule extends MovingModule {
-    private Stage stage;
+    private Stage3D stage;
 
-    public PlayerMovingModule(Stage stage) {
+    public PlayerMovingModule(Stage3D stage) {
         super((movable -> new Vector3f()));
         this.stage = stage;
     }

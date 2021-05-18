@@ -51,9 +51,7 @@ public class Texture {
         System.out.println(this.width + ", " + this.height + ", " + this.width * this.height * 4);
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this.width, this.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-
         glGenerateMipmap(GL_TEXTURE_2D);
-
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
@@ -92,7 +90,12 @@ public class Texture {
         this.width = image.getWidth();
         this.height = image.getHeight();
         textureId = glGenTextures();
+
         glBindTexture(GL_TEXTURE_2D, textureId);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
         float[] floatPixels = new float[image.getWidth() * image.getHeight() * 4];
         for (int i = 0; i < image.getHeight(); i++) {
             for (int j = 0; j < image.getWidth(); j++) {
@@ -105,10 +108,6 @@ public class Texture {
             }
         }
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, floatPixels);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glGenerateMipmap(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
@@ -184,6 +183,8 @@ public class Texture {
     }
 
     public void set(BufferedImage image) {
+        this.width = image.getWidth();
+        this.height = image.getHeight();
         glBindTexture(GL_TEXTURE_2D, textureId);
         float[] floatPixels = new float[image.getWidth() * image.getHeight() * 4];
         for (int i = 0; i < image.getHeight(); i++) {

@@ -3,13 +3,12 @@ package ru.reactiveturtle.engine.geometry;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import ru.reactiveturtle.engine.base.Shader;
-import ru.reactiveturtle.engine.base.Stage;
-import ru.reactiveturtle.engine.base.Value;
+import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.material.Material;
 import ru.reactiveturtle.engine.model.base.Sphere;
 
 public class Plane {
-    private float xFactor, yFactor, zFactor, dFactor;
+    private final float xFactor, yFactor, zFactor, dFactor;
     private Vector3f position;
 
     public Plane(Vector3f position, Vector3f normal) {
@@ -35,15 +34,15 @@ public class Plane {
         return xFactor * point.x + yFactor * point.y + zFactor * point.z + dFactor >= 1;
     }
 
-    public Vector3f intersects(Line line, Value<Boolean> isIntersects) {
-        return line.intersects(this, isIntersects);
+    public Vector3f intersects(Line line) {
+        return line.intersects(this);
     }
 
     public Vector4f getFactors() {
         return new Vector4f(xFactor, yFactor, zFactor, dFactor);
     }
 
-    public void render(Stage stage, Shader textureShader) {
+    public void render(Stage3D stage, Shader textureShader) {
         Sphere sphere = new Sphere(0.1f, 8, false);
         Sphere sphere2 = new Sphere(0.1f, 8, false);
         Material material = new Material();

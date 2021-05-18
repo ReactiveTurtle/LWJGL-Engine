@@ -1,7 +1,7 @@
 package ru.reactiveturtle.engine.base2d;
 
 import org.joml.Matrix4f;
-import ru.reactiveturtle.engine.base.Stage;
+import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.model.mesh.Mesh;
 import ru.reactiveturtle.engine.base.Shader;
 
@@ -31,7 +31,7 @@ public class SquareShader extends Shader {
     }
 
     @Override
-    public void load(Stage stage, Matrix4f model, Mesh mesh) {
+    public void load(Stage3D stage, Matrix4f model, Mesh mesh) {
         super.loadIntUniform(textureSamplerLocation, 0);
         if (stage.getCamera() != null) {
             super.loadMatrix4fUniform(projectionLocation, stage.getCamera().getOrthographicMatrix());

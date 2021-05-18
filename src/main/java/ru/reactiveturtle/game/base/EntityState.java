@@ -1,7 +1,7 @@
 package ru.reactiveturtle.game.base;
 
 import org.joml.Vector3f;
-import ru.reactiveturtle.engine.base.Stage;
+import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.geometry.Frustum;
 import ru.reactiveturtle.engine.model.Model;
 import ru.reactiveturtle.engine.model.Renderable;
@@ -11,7 +11,7 @@ import ru.reactiveturtle.game.world.BoxBodyModel;
 import ru.reactiveturtle.physics.BoxBody;
 import ru.reactiveturtle.physics.Transform3D;
 
-public class EntityState extends Transform3D implements Shadow, Renderable {
+public class EntityState extends Transform3D implements Shadow, Renderable<Stage3D> {
     private Model model;
     private BoxBody body;
     private boolean isInFrustum = false;
@@ -23,11 +23,11 @@ public class EntityState extends Transform3D implements Shadow, Renderable {
     }
 
     @Override
-    public void render(Stage stage) {
+    public void render(Stage3D stage) {
         Frustum frustum = stage.getCamera().getFrustum();
         boolean isInFrustum = frustum.isFigureInFrustum(body.getBoxPoints());
         if (isInFrustum) {
-            System.out.println(model.getMeshes().keySet().toArray()[0]);
+            System.out.println("In frustum: " + model.getMeshes().keySet().toArray()[0]);
             model.setPosition(getBody().getPosition());
             model.setRotation(getBody().getRotation());
             model.render(stage);
@@ -40,7 +40,7 @@ public class EntityState extends Transform3D implements Shadow, Renderable {
     }
 
     @Override
-    public void renderShadow(Stage stage) {
+    public void renderShadow(Stage3D stage) {
         Frustum frustum = stage.getCamera().getFrustum();
         if (isInFrustumCalled) {
             if (isInFrustum) {

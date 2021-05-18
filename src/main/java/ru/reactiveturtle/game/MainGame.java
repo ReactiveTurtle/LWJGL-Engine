@@ -29,6 +29,6 @@ public class MainGame extends GameContext {
     }
 
     @Override
-    protected void destroy() {
+    public void dispose() {
     }
 }

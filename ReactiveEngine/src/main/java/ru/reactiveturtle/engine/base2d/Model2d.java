@@ -3,7 +3,8 @@ package ru.reactiveturtle.engine.base2d;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import ru.reactiveturtle.engine.base.Stage;
+import ru.reactiveturtle.engine.base3d.Stage3D;
+import ru.reactiveturtle.engine.model.Disposeable;
 import ru.reactiveturtle.engine.model.mesh.Mesh;
 import ru.reactiveturtle.engine.material.Texture;
 
@@ -11,7 +12,7 @@ import java.util.HashMap;
 
 import static org.lwjgl.opengl.GL11.*;
 
-class Model2d {
+public class Model2d implements Disposeable {
     private Vector2f position = new Vector2f();
     private Vector3f rotation = new Vector3f();
 
@@ -40,7 +41,7 @@ class Model2d {
                         (float) Math.toRadians(getRotationY()), 0);
     }
 
-    public void draw(Stage stage) {
+    public void draw(Stage3D stage) {
         glEnable(GL_BLEND);
         for (Mesh mesh : meshes.values()) {
             mesh.render(stage, shader, getModelMatrix());
@@ -48,9 +49,9 @@ class Model2d {
         glDisable(GL_BLEND);
     }
 
-    public void destroy() {
+    public void dispose() {
         for (Mesh mesh : meshes.values()) {
-            mesh.destroy();
+            mesh.dispose();
         }
     }
 

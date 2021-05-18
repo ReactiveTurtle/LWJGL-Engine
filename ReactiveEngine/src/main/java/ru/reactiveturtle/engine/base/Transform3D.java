@@ -3,8 +3,9 @@ package ru.reactiveturtle.engine.base;
 import org.joml.Vector3f;
 
 public class Transform3D {
-    protected Vector3f position = new Vector3f();
-    protected Vector3f rotation = new Vector3f();
+    protected final Vector3f position = new Vector3f();
+    protected final Vector3f rotation = new Vector3f();
+    protected final Vector3f scale = new Vector3f(1f, 1f, 1f);
 
     public void setPosition(Vector3f position) {
         setPosition(position.x, position.y, position.z);
@@ -118,5 +119,45 @@ public class Transform3D {
 
     public Vector3f getRotation() {
         return new Vector3f(rotation);
+    }
+
+    public void setScale(float scaleX, float scaleY, float scaleZ) {
+        scale.set(scaleX, scaleY, scaleZ);
+    }
+
+    public void setScale(float scale) {
+        setScale(scale, scale, scale);
+    }
+
+    public void setScale(Vector3f scale) {
+        setScale(scale.x, scale.y, scale.z);
+    }
+
+    public void setScaleX(float scaleX) {
+        setScale(scaleX, scale.y, scale.z);
+    }
+
+    public void setScaleY(float scaleY) {
+        setScale(scale.x, scaleY, scale.z);
+    }
+
+    public void setScaleZ(float scaleZ) {
+        setScale(scale.x, scale.y, scaleZ);
+    }
+
+    public Vector3f getScale() {
+        return new Vector3f(scale);
+    }
+
+    public float getScaleX() {
+        return scale.x;
+    }
+
+    public float getScaleY() {
+        return scale.y;
+    }
+
+    public float getScaleZ() {
+        return scale.z;
     }
 }

@@ -2,8 +2,7 @@ package ru.reactiveturtle.engine.shadow;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import ru.reactiveturtle.engine.base.GameContext;
-import ru.reactiveturtle.engine.base.Stage;
+import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.light.DirectionalLight;
 import ru.reactiveturtle.engine.model.mesh.Mesh;
 import ru.reactiveturtle.engine.base.Shader;
@@ -32,7 +31,7 @@ public class ShadowShader extends Shader {
     }
 
     @Override
-    public void load(Stage stage, Matrix4f modelMatrix, Mesh mesh) {
+    public void load(Stage3D stage, Matrix4f modelMatrix, Mesh mesh) {
         DirectionalLight directionalLight = stage.getGameContext().getShadowManager().renderingDirectionalLight;
         if (stage.getCamera() != null && directionalLight != null) {
             Matrix4f lightViewMatrix = new Matrix4f().identity()

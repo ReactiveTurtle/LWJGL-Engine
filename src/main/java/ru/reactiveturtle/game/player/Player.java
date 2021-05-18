@@ -2,14 +2,16 @@ package ru.reactiveturtle.game.player;
 
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import ru.reactiveturtle.engine.base.Stage;
+import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.base.Transform3D;
 import ru.reactiveturtle.engine.module.moving.Movable;
 import ru.reactiveturtle.engine.shadow.Shadow;
 import ru.reactiveturtle.game.base.Entity;
+import ru.reactiveturtle.game.player.inventory.Inventory;
 import ru.reactiveturtle.game.types.Builder;
 import ru.reactiveturtle.game.types.Collectable;
 import ru.reactiveturtle.game.types.Destroyer;
+import ru.reactiveturtle.physics.BoxBody;
 import ru.reactiveturtle.physics.RigidBody;
 
 public class Player extends Transform3D implements Movable, Shadow {
@@ -51,6 +53,7 @@ public class Player extends Transform3D implements Movable, Shadow {
         mInventory = new Inventory();
         mUI.updateInventoryImage(mInventory);
         mNeeds = new Needs();
+        initRigidBody();
     }
 
     @Override
@@ -189,7 +192,7 @@ public class Player extends Transform3D implements Movable, Shadow {
         return mRightHandTool == null;
     }
 
-    public void renderUI(Stage stage, double deltaTime) {
+    public void renderUI(Stage3D stage, double deltaTime) {
         mUI.render(stage, deltaTime);
     }
 
@@ -198,13 +201,13 @@ public class Player extends Transform3D implements Movable, Shadow {
     }
 
     @Override
-    public void renderShadow(Stage stage) {
+    public void renderShadow(Stage3D stage) {
         if (mRightHandTool != null) {
             ((Entity) mRightHandTool).getCurrentState().renderShadow(stage);
         }
     }
 
-    public void render(Stage stage, double deltaTime) {
+    public void render(Stage3D stage, double deltaTime) {
         mNeeds.update(deltaTime, getMovement());
         mUI.updateNeedsImage(mNeeds);
         if (mIsShaking) {
@@ -288,14 +291,19 @@ public class Player extends Transform3D implements Movable, Shadow {
         rigidBody.setUpHeight(1f);
     }
 
-    private RigidBody rigidBody;
-
-    public void setRigidBody(RigidBody rigidBody) {
-        this.rigidBody = rigidBody;
-    }
+    private BoxBody rigidBody;
 
     public RigidBody getRigidBody() {
         return rigidBody;
+    }
+
+    private void initRigidBody() {
+        rigidBody = new BoxBody(0.5f, 1.85f, 0.5f);
+        rigidBody.setCenter(new Vector3f(0, -0.925f, 0));
+        rigidBody.setY(10f);
+        rigidBody.setZ(1);
+        rigidBody.tag = "player";
+        rigidBody.setType(RigidBody.Type.DYNAMIC);
     }
 
     public interface ActionListener {

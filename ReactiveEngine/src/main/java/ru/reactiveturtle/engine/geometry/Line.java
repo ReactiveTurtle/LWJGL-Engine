@@ -21,15 +21,13 @@ public class Line {
                 -direction.z * position.x + direction.x * position.z);
     }
 
-    public Vector3f intersects(Plane plane, Value<Boolean> isIntersects) {
-        isIntersects.value = true;
+    public Vector3f intersects(Plane plane) {
         Vector4f f1 = new Vector4f(this.f1);
         Vector4f f2 = new Vector4f(this.f2);
         Vector4f f3 = plane.getFactors();
 
         if (f1.y == 0 || f2.z == 0) {
-            isIntersects.value = false;
-            return new Vector3f();
+            return null;
         }
 
         float x = ((f3.y * f1.w / f1.y) + (f3.z * f2.w / f2.z) - f3.w) /

@@ -1,11 +1,12 @@
 package ru.reactiveturtle.game.player;
 
 import ru.reactiveturtle.engine.base.GameContext;
-import ru.reactiveturtle.engine.base.Stage;
+import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.base2d.Square;
 import ru.reactiveturtle.engine.base2d.SquareShader;
 import ru.reactiveturtle.engine.material.Texture;
 import ru.reactiveturtle.game.base.Entity;
+import ru.reactiveturtle.game.player.inventory.Inventory;
 import ru.reactiveturtle.game.types.Collectable;
 import ru.reactiveturtle.game.types.Container;
 import ru.reactiveturtle.game.types.Destructible;
@@ -117,7 +118,7 @@ public class Interface {
         }
     }
 
-    public void render(Stage stage, double deltaTime) {
+    public void render(Stage3D stage, double deltaTime) {
         boolean isDepthTestEnabled = glIsEnabled(GL_DEPTH_TEST);
         if (isDepthTestEnabled) {
             glDisable(GL_DEPTH_TEST);

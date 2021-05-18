@@ -1,13 +1,13 @@
 package ru.reactiveturtle.game.world;
 
-import ru.reactiveturtle.engine.base.Stage;
+import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.material.Texture;
 import ru.reactiveturtle.engine.model.HeightMap;
 import ru.reactiveturtle.engine.model.Renderable;
 import ru.reactiveturtle.engine.shader.TextureShader;
 import ru.reactiveturtle.game.generator.HeightMapGenerator;
 
-public class Chunk implements Renderable {
+public class Chunk implements Renderable<Stage3D> {
     public static final int X_PARTS = 32;
     public static final int Z_PARTS = 32;
 
@@ -28,7 +28,7 @@ public class Chunk implements Renderable {
     }
 
     @Override
-    public void render(Stage stage) {
+    public void render(Stage3D stage) {
         heightMap.render(stage);
     }
 

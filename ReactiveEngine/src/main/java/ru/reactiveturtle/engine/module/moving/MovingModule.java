@@ -1,7 +1,8 @@
 package ru.reactiveturtle.engine.module.moving;
 
 import org.joml.Vector3f;
-import ru.reactiveturtle.engine.toolkit.lambda.Function;
+
+import java.util.function.Function;
 
 public class MovingModule {
     private final Function<Movable, Vector3f> movingRule;
@@ -11,6 +12,6 @@ public class MovingModule {
     }
 
     public Vector3f move(Movable movable) {
-        return this.movingRule.call(movable);
+        return this.movingRule.apply(movable);
     }
 }
