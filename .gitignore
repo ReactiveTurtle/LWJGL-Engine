@@ -1,10 +1,6 @@
 .idea
 .target
 ./src/test
-*.png
-*.jpg
-*.obj
-*.mtl
 .target
 out
 *.log
