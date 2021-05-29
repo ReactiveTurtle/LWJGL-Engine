@@ -5,7 +5,7 @@ import org.joml.Vector3f;
 import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.base2d.Square;
 import ru.reactiveturtle.engine.model.mesh.Mesh;
-import ru.reactiveturtle.engine.material.Texture;
+import ru.reactiveturtle.engine.texture.Texture;
 
 import static org.lwjgl.opengl.GL11.*;
 

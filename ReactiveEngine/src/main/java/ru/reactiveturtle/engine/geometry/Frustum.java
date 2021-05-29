@@ -13,8 +13,8 @@ public class Frustum {
         Vector3f cameraDirection = camera.getDirection();
         Quaternionf quaternionf = new Quaternionf();
         quaternionf.rotateYXZ(
-                (float) Math.toRadians(-camera.getRotationY()),
-                (float) Math.toRadians(90 - camera.getRotationX() - camera.getFOV()),
+                -camera.getRotationY(),
+                (float) (Math.PI / 2 - camera.getRotationX() - camera.getFOV()),
                 0);
 
         planes[0] = new Plane(camera.getPosition(), cameraDirection);
@@ -23,13 +23,13 @@ public class Frustum {
                 new Vector3f(cameraDirection).negate());
 
         planes[1] = new Plane(camera.getPosition(), new Vector3f(0, 0, -1).rotate(quaternionf));
-        quaternionf.rotateX((float) Math.toRadians(-180 + camera.getFOV() * 2));
+        quaternionf.rotateX((float) (-Math.PI + camera.getFOV() * 2));
         planes[2] = new Plane(camera.getPosition(), new Vector3f(0, 0, -1).rotate(quaternionf));
 
-        quaternionf.rotateX((float) Math.toRadians(90 - camera.getFOV()));
-        quaternionf.rotateY((float) Math.toRadians(90 - camera.getFOV()));
+        quaternionf.rotateX((float) (Math.PI / 2 - camera.getFOV()));
+        quaternionf.rotateY((float) (Math.PI / 2 - camera.getFOV()));
         planes[3] = new Plane(camera.getPosition(), new Vector3f(0, 0, -1).rotate(quaternionf));
-        quaternionf.rotateY((float) Math.toRadians(-180 + camera.getFOV() * 2));
+        quaternionf.rotateY((float) (-Math.PI + camera.getFOV() * 2));
         planes[4] = new Plane(camera.getPosition(), new Vector3f(0, 0, -1).rotate(quaternionf));
     }
 

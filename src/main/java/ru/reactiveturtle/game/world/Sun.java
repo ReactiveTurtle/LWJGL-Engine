@@ -9,7 +9,7 @@ public class Sun extends Sphere {
         super(5f, 20, true);
         setShader(textureShader);
         Material material = new Material();
-        material.setEmission(0.5f, 0.5f, 0.4f);
+        material.setEmission(1f, 1f, 0.8f);
         setMaterial(material);
     }
 }

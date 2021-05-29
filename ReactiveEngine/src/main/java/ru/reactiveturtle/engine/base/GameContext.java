@@ -12,7 +12,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryStack;
 import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.base.control.CursorCallback;
-import ru.reactiveturtle.engine.model.Disposeable;
 import ru.reactiveturtle.engine.shadow.ShadowManager;
 
 import java.nio.DoubleBuffer;
@@ -154,7 +153,7 @@ public abstract class GameContext implements Disposeable {
     private void startRender() {
         double time = glfwGetTime();
         Vector2i windowCenter = new Vector2i(width / 2, height / 2);
-        System.out.println("Загрузка завершена. Время загрузки: " + Double.toString(time * 1000).substring(0, 7) + " миллисекунд");
+        System.out.println("Загрузка завершена. Время загрузки: " + Math.round(time * 1000_000) / 1000f + " миллисекунд");
 
         while (!glfwWindowShouldClose(windowId)) {
             if (isWindowFocused) {

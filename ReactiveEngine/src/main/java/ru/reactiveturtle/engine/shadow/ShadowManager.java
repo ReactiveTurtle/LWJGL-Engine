@@ -29,7 +29,7 @@ public class ShadowManager {
         return mShadowShader;
     }
 
-    public void renderShadow(Stage3D stage, Shadow... shadowRenderables) {
+    public void renderShadow(Stage3D stage, ShadowRenderable... shadowRenderableRenderables) {
         if (mIsShadowEnabled) {
             glCullFace(GL_FRONT);
             DirectionalLight[] directionalLights = Light.getDirectionalLights(stage.getLights());
@@ -37,11 +37,11 @@ public class ShadowManager {
                 if (directionalLight.getShadowMap() != null) {
                     mShadowShader.bind();
                     glBindFramebuffer(GL_FRAMEBUFFER, directionalLight.getShadowMap().getFrameBufferId());
-                    glViewport(0, 0, directionalLight.getShadowMap().getShadowTexture().getWidth(),
-                            directionalLight.getShadowMap().getShadowTexture().getHeight());
+                    glViewport(0, 0, directionalLight.getShadowMap().getDepthTexture().getWidth(),
+                            directionalLight.getShadowMap().getDepthTexture().getHeight());
                     glClear(GL_DEPTH_BUFFER_BIT);
                     renderingDirectionalLight = directionalLight;
-                    for (Shadow shadowRenderable : shadowRenderables) {
+                    for (ShadowRenderable shadowRenderable : shadowRenderableRenderables) {
                         shadowRenderable.renderShadow(stage);
                     }
                     mShadowShader.unbind();

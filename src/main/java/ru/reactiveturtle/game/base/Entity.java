@@ -2,8 +2,9 @@ package ru.reactiveturtle.game.base;
 
 import org.joml.Vector3f;
 import ru.reactiveturtle.engine.base3d.Stage3D;
-import ru.reactiveturtle.engine.model.Disposeable;
-import ru.reactiveturtle.engine.toolkit.GeometryTools;
+import ru.reactiveturtle.engine.base.Disposeable;
+import ru.reactiveturtle.engine.toolkit.GeometryExtensions;
+import ru.reactiveturtle.game.MainGame;
 import ru.reactiveturtle.physics.BoxBody;
 import ru.reactiveturtle.physics.Transform3D;
 
@@ -13,17 +14,19 @@ import java.util.List;
 
 public abstract class Entity extends Transform3D implements Disposeable, Cloneable {
     private int id;
-    protected String name;
+    protected String tag;
     protected List<EntityState> entityStates = new ArrayList<>();
     protected int currentStateIndex = 0;
 
-    public Entity(int id, String name, EntityState... entityStates) {
-        this.entityStates.addAll(Arrays.asList(entityStates));
+    public Entity(int id, String tag) {
+        this.entityStates.addAll(Arrays.asList(getDefaultEntityStates()));
         this.id = id;
-        this.name = name;
+        this.tag = tag;
     }
 
-    public abstract int getNextState();
+    protected abstract EntityState[] getDefaultEntityStates();
+
+    protected abstract int getNextState();
 
     protected int nextState() {
         currentStateIndex = (currentStateIndex + 1) % entityStates.size();
@@ -32,8 +35,6 @@ public abstract class Entity extends Transform3D implements Disposeable, Cloneab
 
     public void renderShadow(Stage3D stage) {
         EntityState entityState = entityStates.get(currentStateIndex);
-        entityState.setPosition(getPosition());
-        entityState.setRotation(getRotation());
         entityState.renderShadow(stage);
     }
 
@@ -44,15 +45,15 @@ public abstract class Entity extends Transform3D implements Disposeable, Cloneab
 
     @Override
     public void dispose() {
-
+        MainGame.freeId(id);
     }
 
     public int getId() {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getTag() {
+        return tag;
     }
 
     public EntityState getCurrentState() {
@@ -70,14 +71,10 @@ public abstract class Entity extends Transform3D implements Disposeable, Cloneab
         return null;
     }
 
-    public void updateId(int id) {
-        this.id = id;
-    }
-
     protected Float intersectEntity(Vector3f cameraDirection, Vector3f cameraPosition) {
         EntityState currentState = getCurrentState();
         BoxBody boxBody = currentState.getBody();
-        return GeometryTools.intersectBox(
+        return GeometryExtensions.intersectBox(
                 cameraPosition,
                 cameraDirection,
                 boxBody.getBoxDefaultNormals(),

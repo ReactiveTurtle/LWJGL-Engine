@@ -1,6 +1,5 @@
 package ru.reactiveturtle.engine.base;
 
-import ru.reactiveturtle.engine.model.Renderable;
 import ru.reactiveturtle.engine.toolkit.ReactiveList;
 import ru.reactiveturtle.engine.ui.UIContext;
 
@@ -9,8 +8,11 @@ import ru.reactiveturtle.engine.ui.UIContext;
  * обратной связи для периферийных устройств (клавиатура, мышь)
  */
 public abstract class Stage {
+    protected ReactiveList<Renderable<Stage>> renderables = new ReactiveList<>();
     public Stage(GameContext gameContext) {
         this.gameContext = gameContext;
+        uiContext = new UIContext(gameContext);
+        renderables.add(uiContext);
     }
 
     public abstract void start();
@@ -67,10 +69,17 @@ public abstract class Stage {
         }
     }
 
-    protected ReactiveList<Renderable<Stage>> renderables = new ReactiveList<>();
     protected UIContext uiContext;
+
     public void enableUI() {
-        uiContext = new UIContext(gameContext);
-        renderables.add(uiContext);
+        uiContext.getUILayout().show();
+    }
+
+    public void disableUI() {
+        uiContext.getUILayout().hide();
+    }
+
+    public UIContext getUIContext() {
+        return uiContext;
     }
 }

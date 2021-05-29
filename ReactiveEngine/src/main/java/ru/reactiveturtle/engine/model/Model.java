@@ -1,16 +1,18 @@
 package ru.reactiveturtle.engine.model;
 
 import org.joml.Matrix4f;
+import ru.reactiveturtle.engine.base.Disposeable;
+import ru.reactiveturtle.engine.base.Renderable;
 import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.base.Transform3D;
 import ru.reactiveturtle.engine.model.mesh.Mesh;
 import ru.reactiveturtle.engine.base.Shader;
 import ru.reactiveturtle.engine.material.Material;
-import ru.reactiveturtle.engine.shadow.Shadow;
+import ru.reactiveturtle.engine.shadow.ShadowRenderable;
 
 import java.util.HashMap;
 
-public class Model extends Transform3D implements Shadow, Renderable<Stage3D>, Disposeable {
+public class Model extends Transform3D implements ShadowRenderable, Renderable<Stage3D>, Disposeable {
 
     protected HashMap<String, Mesh> meshes = new HashMap<>();
 

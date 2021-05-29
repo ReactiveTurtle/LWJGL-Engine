@@ -1,4 +1,4 @@
-package ru.reactiveturtle.engine.model;
+package ru.reactiveturtle.engine.base;
 
 import ru.reactiveturtle.engine.base.Stage;
 

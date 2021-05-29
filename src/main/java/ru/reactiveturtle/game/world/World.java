@@ -5,15 +5,18 @@ import ru.reactiveturtle.engine.base.GameContext;
 import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.camera.PerspectiveCamera;
 import ru.reactiveturtle.engine.material.Material;
-import ru.reactiveturtle.engine.material.Texture;
+import ru.reactiveturtle.engine.texture.Texture;
 import ru.reactiveturtle.engine.model.base.Sphere;
 import ru.reactiveturtle.engine.module.moving.MovingModule;
 import ru.reactiveturtle.engine.shader.TextureShader;
+import ru.reactiveturtle.engine.toolkit.MathExtensions;
 import ru.reactiveturtle.engine.ui.Label;
+import ru.reactiveturtle.game.Log;
 import ru.reactiveturtle.game.base.Entity;
 import ru.reactiveturtle.game.player.Player;
 import ru.reactiveturtle.game.player.PlayerMovingModule;
-import ru.reactiveturtle.physics.HeightMap;
+import ru.reactiveturtle.game.types.Collectable;
+import ru.reactiveturtle.physics.TerrainBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,14 +44,14 @@ public class World extends Stage3D {
         super(gameContext);
     }
 
-    private Label label, intersectionLabel;
+    private Label logLabel, intersectionLabel;
 
     @Override
     public void start() {
         setCamera(new PerspectiveCamera(getGameContext().getAspectRatio(), 67f, 0.01f, 10000f));
         dayNight = new DayNight();
         physic = new Physic();
-        player = new Player(getGameContext().getAspectRatio());
+        player = new Player(gameContext);
         TextureShader textureShader = new TextureShader();
 
         setKeyCallback((key, action) -> {
@@ -85,23 +88,29 @@ public class World extends Stage3D {
                     player.jump();
                 }
             }
-        });
-
-        getGameContext().setCursorCallback(bias -> {
-            player.addRotation(bias.y, bias.x, 0);
-        });
-
-        setMouseCallback(new MouseCallback() {
-            @Override
-            public void onScroll(int direction) {
-                super.onScroll(direction);
-                player.wheelInventory(-direction);
+            if (action == GLFW_PRESS) {
+                switch (key) {
+                    case GLFW_KEY_E:
+                        Entity observable = player.getObservableEntity();
+                        if (player.takeObservable()) {
+                            physic.removeBody(observable.getCurrentState().getBody());
+                            lootMap.remove(observable.getId());
+                            intersectionLabel.setText("");
+                        }
+                        break;
+                    case GLFW_KEY_Q:
+                        Entity throwed = player.throwCurrentInventoryItem();
+                        if (throwed != null) {
+                            physic.putBody(throwed.getCurrentState().getBody());
+                            lootMap.add(throwed);
+                        }
+                        break;
+                }
             }
         });
 
         getGameContext().getShadowManager().setShadowEnabled(true);
 
-        player = new Player(getGameContext().getAspectRatio());
         physic.putBody(player.getRigidBody());
 
         player.setPosition(1f, 45f, 2f);
@@ -128,18 +137,20 @@ public class World extends Stage3D {
         });
 
         addLight(dayNight.getLight());
-        Texture texture = new Texture("texture/ground.jpg");
+        Texture texture = new Texture("texture/sand.jpg");
         for (int i = -10; i < 10; i++) {
             for (int j = -10; j < 10; j++) {
                 Chunk chunk = new Chunk(314124, j, i, texture);
                 chunk.setShader(textureShader);
                 chunks.add(chunk);
-                physic.putBody(new HeightMap(
-                        chunk.getHeightMap().getVertices(),
+                TerrainBody terrainBody = new TerrainBody(
+                        chunk.getTerrain().getVertices(),
                         Chunk.X_PARTS,
                         Chunk.Z_PARTS,
                         Chunk.CHUNK_WIDTH,
-                        Chunk.CHUNK_DEPTH));
+                        Chunk.CHUNK_DEPTH);
+                terrainBody.setPosition(chunk.getTerrain().getPosition());
+                physic.putBody(terrainBody);
             }
         }
         lootMap = new LootMap(physic, textureShader);
@@ -157,32 +168,44 @@ public class World extends Stage3D {
         sun = new Sun(textureShader);
         sun.setPosition(0, 40, 0);
 
-        enableUI();
-        label = new Label(uiContext, 0.5f, 0.25f);
-        label.setFontSize(40);
-        label.setPosition(label.getWidth() - gameContext.getAspectRatio(), 1 - label.getHeight(), 0);
-        label.setBackground(0, 0, 0, 0x42);
-        uiContext.getUILayout().add(label);
+        logLabel = new Label(uiContext);
+        logLabel.setFontSize(40);
+        logLabel.setPosition(logLabel.getWidth() - gameContext.getAspectRatio(), 1 - logLabel.getHeight(), 0);
+        logLabel.setBackground(0, 0, 0, 0x42);
+        uiContext.getUILayout().add(logLabel);
 
-        intersectionLabel = new Label(uiContext, 1f, 0.25f);
+        intersectionLabel = new Label(uiContext);
         intersectionLabel.setPosition(0, 0, 0);
         intersectionLabel.setFontSize(40);
         uiContext.getUILayout().add(intersectionLabel);
         lootMap.setIntersectionListener(new LootMap.IntersectionListener() {
             @Override
             public void onIntersect(Entity entity, Float distance) {
-                intersectionLabel.setText(entity.getName() + ": " + Math.round(distance * 100) / 100f);
+                if (player.getObservableEntity() != entity) {
+                    player.setObservableObject(entity);
+                }
+                Entity observable = player.getObservableEntity();
+                String text = "";
+                if (observable instanceof Collectable) {
+                    text += "Нажмите E чтобы подобрать";
+                }
+                text += "\n" + observable.getTag() + ": " + MathExtensions.round(distance, 2) + " m";
+                intersectionLabel.setText(text);
             }
 
             @Override
             public void onNotIntersect() {
-                intersectionLabel.setText("");
+                if (player.getObservableEntity() != null) {
+                    player.setObservableObject(null);
+                    intersectionLabel.setText("");
+                }
             }
         });
     }
 
     @Override
     public void render() {
+        Log.inFrustum = "";
         double deltaTime = getGameContext().getDeltaTime();
         PerspectiveCamera camera = getCamera();
         Vector3f playerTranslation = playerMovingModule.move(player);
@@ -191,7 +214,7 @@ public class World extends Stage3D {
         physic.update(deltaTime);
 
         if (!player.isLockYMove()) {
-            camera.addPosition(playerTranslation);
+            camera.addPosition(playerTranslation.mul(10));
         } else {
             player.setPosition(player.getRigidBody().getPosition().add(0, 1.85f, 0));
             camera.setPosition(player.getCameraPosition());
@@ -210,13 +233,19 @@ public class World extends Stage3D {
         lootMap.render(this);
         sun.render(this);
         player.render(this, deltaTime);
-        player.renderUI(this, deltaTime);
 
         Vector3f playerPosition = player.getPosition();
-        playerPosition.x = Math.round(playerPosition.x * 10) / 10f;
-        playerPosition.y = Math.round(playerPosition.y * 10) / 10f;
-        playerPosition.z = Math.round(playerPosition.z * 10) / 10f;
-        label.setText("x: " + playerPosition.x + "\ny: " + playerPosition.y + "\nz: " + playerPosition.z);
-
+        playerPosition.x = MathExtensions.round(playerPosition.x, 1);
+        playerPosition.y = MathExtensions.round(playerPosition.y, 1);
+        playerPosition.z = MathExtensions.round(playerPosition.z, 1);
+        logLabel.setText("x: " + playerPosition.x
+                + "\ny: " + playerPosition.y
+                + "\nz: " + playerPosition.z
+                + "\nCamera position: "
+                + "\nx: " + MathExtensions.round(camera.getX(), 1)
+                + "\ny: " + MathExtensions.round(camera.getY(), 1)
+                + "\nz: " + MathExtensions.round(camera.getZ(), 1)
+                + "\n" + Log.inFrustum);
+        logLabel.setPosition(logLabel.getWidth() - gameContext.getAspectRatio(), 1 - logLabel.getHeight(), 0);
     }
 }

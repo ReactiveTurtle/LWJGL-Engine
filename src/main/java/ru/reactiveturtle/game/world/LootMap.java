@@ -1,8 +1,10 @@
 package ru.reactiveturtle.game.world;
 
 import ru.reactiveturtle.engine.base3d.Stage3D;
-import ru.reactiveturtle.engine.model.Renderable;
+import ru.reactiveturtle.engine.base.Renderable;
 import ru.reactiveturtle.engine.shader.TextureShader;
+import ru.reactiveturtle.engine.shadow.ShadowRenderable;
+import ru.reactiveturtle.engine.toolkit.ReactiveList;
 import ru.reactiveturtle.game.MainGame;
 import ru.reactiveturtle.game.base.Entity;
 import ru.reactiveturtle.game.types.Intersectable;
@@ -11,8 +13,8 @@ import ru.reactiveturtle.game.weapon.DragunovSniperRifle;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LootMap implements Renderable<Stage3D> {
-    private final List<Entity> lootMap = new ArrayList<>();
+public class LootMap implements Renderable<Stage3D>, ShadowRenderable {
+    private final ReactiveList<Entity> lootMap = new ReactiveList<>();
 
     public LootMap(Physic physic, TextureShader textureShader) {
         generateWeapons(physic, textureShader);
@@ -45,10 +47,27 @@ public class LootMap implements Renderable<Stage3D> {
         if (intersectionListener != null) {
             if (intersected != null) {
                 intersectionListener.onIntersect(intersected, intersectedDistance);
-                System.out.println(intersected.getName() + " intersects. Distance: " + intersectedDistance + ".");
             } else {
                 intersectionListener.onNotIntersect();
             }
+        }
+    }
+
+    @Override
+    public void renderShadow(Stage3D stage) {
+        for (Entity entity : lootMap) {
+            entity.renderShadow(stage);
+        }
+    }
+
+    public void add(Entity entity) {
+        lootMap.add(entity);
+    }
+
+    public void remove(int id) {
+        int index = lootMap.indexOf(x -> x.getId() == id);
+        if (index > -1) {
+            lootMap.remove(index);
         }
     }
 

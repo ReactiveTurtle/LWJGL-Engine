@@ -13,7 +13,7 @@ public class MainGame extends GameContext {
     private static final List<Integer> ID_LIST = new ArrayList<>();
     private static final Random random = new Random();
 
-    public static int generateId() {
+    public synchronized static int generateId() {
         int randInt = random.nextInt();
         while (ID_LIST.contains(randInt)) {
             randInt = random.nextInt();
@@ -21,11 +21,15 @@ public class MainGame extends GameContext {
         return randInt;
     }
 
+    public synchronized static void freeId(int id) {
+        ID_LIST.remove(Integer.valueOf(id));
+    }
+
     @Override
     protected void run() {
         world = new World(this);
-        world.start();
         setStage(world);
+        world.start();
     }
 
     @Override

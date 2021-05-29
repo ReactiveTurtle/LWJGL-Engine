@@ -1,18 +1,18 @@
 package ru.reactiveturtle.game.generator;
 
 import ru.reactiveturtle.engine.material.Material;
-import ru.reactiveturtle.engine.material.Texture;
-import ru.reactiveturtle.engine.model.HeightMap;
+import ru.reactiveturtle.engine.texture.Texture;
+import ru.reactiveturtle.engine.model.terrain.Terrain;
 
 import java.util.Random;
 
 import static ru.reactiveturtle.game.world.Chunk.*;
 
 public class HeightMapGenerator {
-    public static HeightMap generateHeightMap(long seed,
-                                              int chunkX,
-                                              int chunkZ,
-                                              Texture texture) {
+    public static Terrain generateHeightMap(long seed,
+                                            int chunkX,
+                                            int chunkZ,
+                                            Texture texture) {
         float[] vertices = new float[(X_PARTS) * (Z_PARTS) * 18];
         int startIntX = chunkX * X_PARTS, startIntZ = chunkZ * Z_PARTS;
         float startX = -CHUNK_WIDTH / 2, startZ = -CHUNK_DEPTH / 2;
@@ -47,14 +47,13 @@ public class HeightMapGenerator {
         Material heightMapMaterial = new Material();
         heightMapMaterial.setDiffuse(1f, 1f, 1f);
         heightMapMaterial.setTexture(texture);
-        HeightMap heightMap = new HeightMap(CHUNK_WIDTH, CHUNK_DEPTH, vertices, X_PARTS + 1, Z_PARTS + 1, 1f, 1f);
-        heightMap.setPosition(chunkX * CHUNK_WIDTH + startX, 0, chunkZ * CHUNK_DEPTH + startZ);
-        heightMap.setMaterial(heightMapMaterial);
-        return heightMap;
+        Terrain terrain = new Terrain(CHUNK_WIDTH, CHUNK_DEPTH, vertices, X_PARTS + 1, Z_PARTS + 1, 1f, 1f);
+        terrain.setPosition(chunkX * CHUNK_WIDTH + startX, 0, chunkZ * CHUNK_DEPTH + startZ);
+        terrain.setMaterial(heightMapMaterial);
+        return terrain;
     }
 
     public static float getHeight(long seed, int x, int y) {
-        if (true) return 0;
         float left = genSmoothNumber(seed, x - 1, y);
         float leftTop = genSmoothNumber(seed, x - 1, y - 1);
         float top = genSmoothNumber(seed, x, y - 1);
@@ -65,7 +64,7 @@ public class HeightMapGenerator {
         float leftBottom = genSmoothNumber(seed, x - 1, y + 1);
         float center = genSmoothNumber(seed, x, y);
         return (left / 8 + leftTop / 8 + top / 8 + rightTop / 8 +
-                right / 8 + rightBottom / 8 + bottom / 8 + leftBottom / 8) * 10;
+                right / 8 + rightBottom / 8 + bottom / 8 + leftBottom / 8) * 0;
     }
 
     public static float genSmoothNumber(long seed, int x, int y) {

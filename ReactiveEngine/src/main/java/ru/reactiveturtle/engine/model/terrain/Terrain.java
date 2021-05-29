@@ -1,9 +1,9 @@
-package ru.reactiveturtle.engine.model;
+package ru.reactiveturtle.engine.model.terrain;
 
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import ru.reactiveturtle.engine.material.Material;
-import ru.reactiveturtle.engine.material.Texture;
+import ru.reactiveturtle.engine.texture.Texture;
+import ru.reactiveturtle.engine.model.Model;
 import ru.reactiveturtle.engine.model.mesh.Mesh;
 
 import java.nio.ByteBuffer;
@@ -11,29 +11,30 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class HeightMap extends Model {
+public class Terrain extends Model {
+    private static final String MESH_KEY = "Terrain";
     private static final int MAX_COLOR = 255 * 255 * 255;
 
     private float[] vertices;
     private float[] normals;
-    private float width, height;
-    private int mapWidth, mapHeight;
+    private float width, depth;
+    private int mapWidth, mapDepth;
 
-    public static HeightMap create(Texture heightMap, float width, float height, float depth, float textureX, float textureY) {
-        return new HeightMap(width, depth, getVertices(heightMap, width, height, depth),
-                heightMap.getWidth(), heightMap.getHeight(), textureX, textureY);
+    public static Terrain create(Texture heightMapTexture, float width, float height, float depth, float textureX, float textureY) {
+        return new Terrain(width, depth, getVertices(heightMapTexture, width, height, depth),
+                heightMapTexture.getWidth(), heightMapTexture.getHeight(), textureX, textureY);
     }
 
-    public HeightMap(float width, float height, float[] vertices, int mapWidth, int mapHeight, float textureX, float textureY) {
-        super(new Mesh("heightMap", vertices, getIndices(mapWidth, mapHeight)));
+    public Terrain(float width, float depth, float[] vertices, int mapWidth, int mapDepth, float textureX, float textureY) {
+        super(new Mesh(MESH_KEY, vertices, getIndices(mapWidth, mapDepth)));
         this.mapWidth = mapWidth;
-        this.mapHeight = mapHeight;
+        this.mapDepth = mapDepth;
         this.width = width;
-        this.height = height;
+        this.depth = depth;
         this.vertices = vertices;
-        Mesh mesh = meshes.get("heightMap");
-        mesh.setTextureCoordinates(getTextureCoordinates(mapWidth, mapHeight, textureX, textureY));
-        this.normals = getNormals(vertices, mapWidth, mapHeight);
+        Mesh mesh = meshes.get(MESH_KEY);
+        mesh.setTextureCoordinates(getTextureCoordinates(mapWidth, mapDepth, textureX, textureY));
+        this.normals = getNormals(vertices, mapWidth, mapDepth);
         mesh.setNormals(normals);
     }
 
@@ -295,7 +296,7 @@ public class HeightMap extends Model {
     public float getY(float x, float z) {
         try {
             float mapX = (x + width / 2f + getX()) / width * (mapWidth);
-            float mapZ = (z + height / 2f + getZ()) / height * (mapHeight);
+            float mapZ = (z + depth / 2f + getZ()) / depth * (mapDepth);
 
             float mapModX = (float) (mapX - Math.floor(mapX));
             float mapModZ = (float) (mapZ - Math.floor(mapZ));
@@ -336,7 +337,7 @@ public class HeightMap extends Model {
     public Vector3f getRotation(float x, float z) {
         try {
             float mapX = (x + width / 2f + getX()) / width * (mapWidth + 1);
-            float mapZ = (z + height / 2f + getZ()) / height * (mapHeight + 1);
+            float mapZ = (z + depth / 2f + getZ()) / depth * (mapDepth + 1);
 
             mapX = (int) mapX;
             mapZ = (int) mapZ;
@@ -382,15 +383,15 @@ public class HeightMap extends Model {
         return mapWidth;
     }
 
-    public int getMapHeight() {
-        return mapHeight;
+    public int getMapDepth() {
+        return mapDepth;
     }
 
     public float getWidth() {
         return width;
     }
 
-    public float getHeight() {
-        return height;
+    public float getDepth() {
+        return depth;
     }
 }

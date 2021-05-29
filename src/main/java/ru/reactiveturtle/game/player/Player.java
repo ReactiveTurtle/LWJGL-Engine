@@ -2,23 +2,27 @@ package ru.reactiveturtle.game.player;
 
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import ru.reactiveturtle.engine.base.GameContext;
+import ru.reactiveturtle.engine.base.Stage;
 import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.base.Transform3D;
 import ru.reactiveturtle.engine.module.moving.Movable;
-import ru.reactiveturtle.engine.shadow.Shadow;
+import ru.reactiveturtle.engine.shader.TextureShader;
+import ru.reactiveturtle.engine.shadow.ShadowRenderable;
+import ru.reactiveturtle.game.Helper;
 import ru.reactiveturtle.game.base.Entity;
 import ru.reactiveturtle.game.player.inventory.Inventory;
+import ru.reactiveturtle.game.player.inventory.InventoryItem;
 import ru.reactiveturtle.game.types.Builder;
-import ru.reactiveturtle.game.types.Collectable;
 import ru.reactiveturtle.game.types.Destroyer;
+import ru.reactiveturtle.game.world.BoxBodyModel;
 import ru.reactiveturtle.physics.BoxBody;
 import ru.reactiveturtle.physics.RigidBody;
 
-public class Player extends Transform3D implements Movable, Shadow {
+public class Player extends Transform3D implements Movable, ShadowRenderable {
     private boolean isLockYMove = false;
     private boolean isLockTopBottomRotation = false;
 
-    private Collectable mRightHandTool;
     private Vector3f mRightHandToolPosition = new Vector3f(), mRightHandToolRotation = new Vector3f();
 
     private boolean mIsRightToolPitch = false;
@@ -38,8 +42,9 @@ public class Player extends Transform3D implements Movable, Shadow {
 
     private Interface mUI;
 
+    private InventoryItem mRightHandItem;
     private Inventory mInventory;
-    private Integer mObservableId;
+    private Entity mObservable;
 
     private Needs mNeeds;
 
@@ -47,28 +52,45 @@ public class Player extends Transform3D implements Movable, Shadow {
 
     private Vector3f cameraPosition = new Vector3f();
 
-    public Player(float aspectRatio) {
+    private TextureShader textureShader;
+
+    public Player(GameContext gameContext) {
         setMovement(Movement.WALK);
-        mUI = new Interface(aspectRatio);
+        textureShader = new TextureShader();
+        mUI = new Interface(gameContext.getStage().getUIContext());
         mInventory = new Inventory();
         mUI.updateInventoryImage(mInventory);
         mNeeds = new Needs();
         initRigidBody();
+
+        gameContext.setCursorCallback(bias -> {
+            float biasX = bias.y;
+            float biasY = bias.x;
+            addRotation((float) Math.toRadians(biasX), (float) Math.toRadians(biasY), 0);
+        });
+
+        gameContext.getStage().setMouseCallback(new Stage.MouseCallback() {
+            @Override
+            public void onScroll(int direction) {
+                super.onScroll(direction);
+                wheelInventory(-direction);
+            }
+        });
     }
 
     @Override
-    public void addRotation(float degreesX, float degreesY, float degreesZ) {
-        super.addRotation(degreesX, degreesY, degreesZ);
+    public void addRotation(float radianX, float radianY, float radianZ) {
+        super.addRotation(radianX, radianY, radianZ);
         if (isLockTopBottomRotation) {
-            if (Math.abs(getRotationX()) > 90) {
-                setRotationX(90 * Math.signum(getRotationX()));
+            if (Math.abs(getRotationX()) > Math.PI / 2) {
+                setRotationX((float) (Math.PI / 2 * Math.signum(getRotationX())));
             }
         }
-        if (mRightHandTool != null) {
+        if (mRightHandItem != null) {
             Vector3f vector3f = new Vector3f();
             Quaternionf quaternionf = new Quaternionf();
-            quaternionf.rotateYXZ((float) Math.toRadians(180 - getRotationY()),
-                    (float) Math.toRadians(getRotationX()), 0);
+            quaternionf.rotateYXZ((float) (Math.PI - getRotationY()),
+                    getRotationX(), 0);
             if (mIsShaking) {
                 quaternionf.rotateX((mIsRightToolPitch ? mShakingMaxAngle / 2 : Math.abs(mShakingAngle / 2)) + mShakingAngle / 9);
             }
@@ -79,15 +101,15 @@ public class Player extends Transform3D implements Movable, Shadow {
             }
             quaternionf.getEulerAnglesXYZ(vector3f);
             mRightHandToolRotation.set(
-                    (float) Math.toDegrees(vector3f.x),
-                    (float) Math.toDegrees(vector3f.y),
-                    (float) Math.toDegrees(vector3f.z));
+                    vector3f.x,
+                    vector3f.y,
+                    vector3f.z);
         }
         if (mIsShaking) {
             Vector3f roll = new Vector3f(0, 0.1f, 0);
             roll.rotateZ(mShakingAngle);
             Vector3f pitch = new Vector3f(roll.x, 0f, 0);
-            pitch.rotateY((float) Math.toRadians(-getRotationY()));
+            pitch.rotateY(-getRotationY());
             cameraPosition.set(pitch.x, roll.y - 0.1, pitch.z);
         } else {
             cameraPosition.set(0, 0, 0);
@@ -105,20 +127,20 @@ public class Player extends Transform3D implements Movable, Shadow {
     @Override
     public void setPosition(Vector3f position) {
         super.setPosition(position);
-        if (mRightHandTool != null) {
+        if (mRightHandItem != null) {
             mRightHandToolPosition.set(getCameraPosition());
             float x = 0.15f * 2, y = -0.2f * 2 - cameraPosition.y / 4, z = -0.25f * 2;
             float b = z;
-            b *= (float) Math.cos(Math.toRadians(rotation.x));
-            mRightHandToolPosition.add((float) Math.sin(Math.toRadians(rotation.y)) * -1.0f * b,
-                    (float) Math.sin(Math.toRadians(rotation.x)) * z,
-                    (float) Math.cos(Math.toRadians(rotation.y)) * b);
-            mRightHandToolPosition.add((float) Math.sin(Math.toRadians(rotation.y - 90)) * -1.0f * x,
-                    0, (float) Math.cos(Math.toRadians(rotation.y - 90)) * x);
-            b = (float) Math.cos(Math.toRadians(rotation.x + 90)) * y;
-            mRightHandToolPosition.add((float) Math.sin(Math.toRadians(rotation.y)) * -1.0f * b,
-                    (float) Math.sin(Math.toRadians(rotation.x + 90)) * y,
-                    (float) Math.cos(Math.toRadians(rotation.y)) * b);
+            b *= (float) Math.cos(rotation.x);
+            mRightHandToolPosition.add((float) Math.sin(rotation.y) * -1.0f * b,
+                    (float) Math.sin(rotation.x) * z,
+                    (float) Math.cos(rotation.y) * b);
+            mRightHandToolPosition.add((float) Math.sin(rotation.y - Math.PI / 2) * -1.0f * x,
+                    0, (float) Math.cos(rotation.y - Math.PI / 2) * x);
+            b = (float) Math.cos(rotation.x + Math.PI / 2) * y;
+            mRightHandToolPosition.add((float) Math.sin(rotation.y) * -1.0f * b,
+                    (float) Math.sin(rotation.x + Math.PI / 2) * y,
+                    (float) Math.cos(rotation.y) * b);
         }
     }
 
@@ -135,24 +157,46 @@ public class Player extends Transform3D implements Movable, Shadow {
     }
 
 
-    public void setObservableObject(Integer observableId) {
-        mObservableId = observableId;
+    public void setObservableObject(Entity observable) {
+        mObservable = observable;
     }
 
-    public Integer getObservableId() {
-        return mObservableId;
+    public Entity getObservableEntity() {
+        return mObservable;
     }
 
-    public boolean takeInventoryItem(Collectable item) {
-        int position = mInventory.getCurrentItemPosition();
-        while (position < mInventory.getInventorySize() && mInventory.getItem(position) != null &&
-                !((Entity) mInventory.getItem(position)).getName().equals(((Entity) item).getName())) {
-            position++;
+    public boolean takeObservable() {
+        Entity item = mObservable;
+        if (item == null) {
+            return false;
         }
+        setObservableObject(null);
+
+        int emptyPosition = -1;
+        int equalEntityPosition = -1;
+        for (int i = 0; i < mInventory.getInventorySize() && (emptyPosition == -1 || equalEntityPosition == -1); i++) {
+            if (emptyPosition == -1) {
+                if (mInventory.isCellEmpty(i)) {
+                    emptyPosition = i;
+                }
+            }
+            if (equalEntityPosition == -1) {
+                if (!mInventory.isCellEmpty(i) &&
+                        mInventory.getItem(i).getEntityTag().equals(item.getTag())) {
+                    equalEntityPosition = i;
+                }
+            }
+        }
+
+        int position = equalEntityPosition == -1 ? emptyPosition : equalEntityPosition;
+        if (position == -1) {
+            return false;
+        }
+
         if (position < mInventory.getInventorySize()) {
             mInventory.addItem(position, item);
         }
-        mRightHandTool = mInventory.getCurrentItem();
+        mRightHandItem = mInventory.getCurrentItem();
         mUI.updateInventoryImage(mInventory);
         return position < mInventory.getInventorySize();
     }
@@ -161,39 +205,41 @@ public class Player extends Transform3D implements Movable, Shadow {
         return mNeeds.addHunger(calories);
     }
 
-    public Collectable throwInventoryItem() {
-        Collectable item = mInventory.getCurrentItem();
-        removeCurrentInventoryItem();
-        return item;
-    }
+    public Entity throwCurrentInventoryItem() {
+        InventoryItem item = mInventory.getCurrentItem();
+        if (item == null) {
+            return null;
+        }
 
-    public void removeCurrentInventoryItem() {
         mInventory.removeItem(mInventory.getCurrentItemPosition());
-        mRightHandTool = mInventory.getCurrentItem();
+        mRightHandItem = mInventory.getCurrentItem();
         mUI.updateInventoryImage(mInventory);
-    }
 
-    public boolean isCurrentInventoryItemEmpty() {
-        return mInventory.getCurrentItem() == null;
+        Quaternionf quaternionf = new Quaternionf();
+        quaternionf.rotateYXZ(
+                getRotationY(),
+                getRotationX(),
+                getRotationZ());
+
+        Vector3f vector3f = new Vector3f(0, 0, 1);
+        vector3f.rotate(quaternionf);
+
+        return item.takeEntity();
     }
 
     public void wheelInventory(double dy) {
         mIsHit = false;
         mInventory.wheelInventory(dy);
-        mRightHandTool = mInventory.getCurrentItem();
+        mRightHandItem = mInventory.getCurrentItem();
         mUI.updateInventoryImage(mInventory);
     }
 
-    public Collectable getRightHandTool() {
-        return mRightHandTool;
+    public InventoryItem getRightHandItem() {
+        return mRightHandItem;
     }
 
     public boolean isRightHandEmpty() {
-        return mRightHandTool == null;
-    }
-
-    public void renderUI(Stage3D stage, double deltaTime) {
-        mUI.render(stage, deltaTime);
+        return mRightHandItem == null;
     }
 
     public Interface getUI() {
@@ -202,8 +248,8 @@ public class Player extends Transform3D implements Movable, Shadow {
 
     @Override
     public void renderShadow(Stage3D stage) {
-        if (mRightHandTool != null) {
-            ((Entity) mRightHandTool).getCurrentState().renderShadow(stage);
+        if (mRightHandItem != null) {
+            mRightHandItem.renderShadow(stage);
         }
     }
 
@@ -216,12 +262,15 @@ public class Player extends Transform3D implements Movable, Shadow {
         if (mIsHit) {
             calcHit(deltaTime);
         }
-        if (mRightHandTool != null) {
-            Entity tool = (Entity) mRightHandTool;
-            tool.getCurrentState().setPosition(mRightHandToolPosition);
-            tool.getCurrentState().setRotation(mRightHandToolRotation);
-            tool.getCurrentState().render(stage);
+        if (mRightHandItem != null) {
+            InventoryItem tool = mRightHandItem;
+            tool.updatePositionAndRotationRelativelyPlayer(getCameraPosition(), getRotation());
+            tool.render(stage);
         }
+
+        /*BoxBodyModel boxBodyModel = Helper.bodyToModel(rigidBody);
+        boxBodyModel.setShader(textureShader);
+        boxBodyModel.render(stage);*/
     }
 
     private void calcShaking(double deltaTime) {
@@ -266,8 +315,8 @@ public class Player extends Transform3D implements Movable, Shadow {
     }
 
     public void hit() {
-        if (mRightHandTool != null &&
-                (mRightHandTool instanceof Destroyer || mRightHandTool instanceof Builder)) {
+        if (mRightHandItem != null &&
+                (mRightHandItem instanceof Destroyer || mRightHandItem instanceof Builder)) {
             if (!mIsHit) {
                 mHitAngle = mHitMaxAngle;
                 mIsHit = true;

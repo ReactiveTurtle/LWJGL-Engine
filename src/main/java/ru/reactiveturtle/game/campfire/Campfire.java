@@ -8,6 +8,7 @@ import ru.reactiveturtle.engine.model.loader.ObjLoader;
 import ru.reactiveturtle.engine.particle.ParticleShader;
 import ru.reactiveturtle.engine.shader.TextureShader;
 import ru.reactiveturtle.game.base.Entity;
+import ru.reactiveturtle.game.base.EntityState;
 import ru.reactiveturtle.game.types.Collectable;
 import ru.reactiveturtle.game.types.Combustible;
 import ru.reactiveturtle.game.types.Firebox;
@@ -21,8 +22,7 @@ public class Campfire extends Entity implements Firebox {
     private PointLight mPointLight;
     private Vector3f mDiffuse;
 
-    public Campfire(int id, String name,
-                    PointLight pointLight, TextureShader textureShader, ParticleShader particleShader) {
+    public Campfire(int id, String name, TextureShader textureShader, ParticleShader particleShader) {
         super(id, name);
         try {
             mStone = ObjLoader.load("object/campfire/campfire_stone");
@@ -33,7 +33,7 @@ public class Campfire extends Entity implements Firebox {
 
             mFlame = new Flame(particleShader);
 
-            mPointLight = pointLight;
+            mPointLight = new PointLight();
             mDiffuse = new Vector3f(0.6f, 0.6f, 0.4f);
         } catch (IOException e) {
             e.printStackTrace();
@@ -92,6 +92,11 @@ public class Campfire extends Entity implements Firebox {
     @Override
     public float getBurningTime() {
         return mFlame.getBurningTime();
+    }
+
+    @Override
+    protected EntityState[] getDefaultEntityStates() {
+        return new EntityState[0];
     }
 
     @Override

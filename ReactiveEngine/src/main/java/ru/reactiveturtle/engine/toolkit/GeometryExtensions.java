@@ -5,7 +5,7 @@ import org.joml.Vector3f;
 import ru.reactiveturtle.engine.geometry.Line;
 import ru.reactiveturtle.engine.geometry.Plane;
 
-public class GeometryTools {
+public class GeometryExtensions {
     /**
      * @param position                  Положение направляющей прямой в пространстве,
      *                                  которая нужна для описания прямой

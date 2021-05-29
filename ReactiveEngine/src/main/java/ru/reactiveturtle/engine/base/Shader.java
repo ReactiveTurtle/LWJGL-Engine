@@ -8,8 +8,6 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import ru.reactiveturtle.engine.base3d.Stage3D;
-import ru.reactiveturtle.engine.exceptions.ObjectDisposedException;
-import ru.reactiveturtle.engine.model.Disposeable;
 import ru.reactiveturtle.engine.model.mesh.Mesh;
 
 import java.io.BufferedReader;

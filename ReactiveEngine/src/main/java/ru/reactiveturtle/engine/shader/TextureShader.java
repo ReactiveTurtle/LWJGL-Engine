@@ -215,7 +215,7 @@ public class TextureShader extends Shader {
 
         super.loadIntUniform(directionalLightShadowMapLocations[index], 2 + index);
         glActiveTexture(GL_TEXTURE2 + index);
-        GL11.glBindTexture(GL_TEXTURE_2D, directionalLight.getShadowMap().getShadowTexture().getTextureId());
+        GL11.glBindTexture(GL_TEXTURE_2D, directionalLight.getShadowMap().getDepthTexture().getTextureId());
 
         Matrix4f lightViewMatrix = new Matrix4f().identity().lookAt(directionalLight.getDirection(), new Vector3f(0, 0, 0), new Vector3f(0, 1, 0));
         super.loadMatrix4fUniform(modelLightViewProjectionMatrixLocation[index],

@@ -1,9 +1,8 @@
 package ru.reactiveturtle.engine.ui;
 
 import org.joml.Vector2i;
-import org.lwjgl.opengl.GL11;
 import ru.reactiveturtle.engine.base2d.Square;
-import ru.reactiveturtle.engine.material.Texture;
+import ru.reactiveturtle.engine.texture.Texture;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -14,7 +13,7 @@ public class UIElement extends Square {
     protected Integer id;
 
     public UIElement(UIContext uiContext, float relativeWidth, float relativeHeight) {
-        super(relativeWidth, relativeHeight, new Texture(1, 1, GL11.GL_RGBA), 1, 1);
+        super(relativeWidth, relativeHeight, new Texture(1, 1, Texture.PixelFormat.RGBA), 1, 1);
         this.uiContext = uiContext;
         bufferedImage = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
     }

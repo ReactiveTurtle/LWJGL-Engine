@@ -1,6 +1,6 @@
 package ru.reactiveturtle.engine.shadow;
 
-import ru.reactiveturtle.engine.material.Texture;
+import ru.reactiveturtle.engine.texture.DepthTexture;
 
 import static org.lwjgl.opengl.GL11.GL_NONE;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
@@ -10,13 +10,14 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class ShadowMap {
     private static final int WIDTH = 2048, HEIGHT = 2048;
-    private Texture shadowTexture;
-    private int frameBufferId;
+    private final DepthTexture depthTexture;
+    private final int frameBufferId;
+
     public ShadowMap() {
+        depthTexture = new DepthTexture(WIDTH, HEIGHT);
         frameBufferId = glGenFramebuffers();
-        shadowTexture = new Texture(WIDTH, HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, frameBufferId);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowTexture.getTextureId(), 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture.getTextureId(), 0);
         // Set only depth
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
@@ -31,7 +32,7 @@ public class ShadowMap {
         return frameBufferId;
     }
 
-    public Texture getShadowTexture() {
-        return shadowTexture;
+    public DepthTexture getDepthTexture() {
+        return depthTexture;
     }
 }

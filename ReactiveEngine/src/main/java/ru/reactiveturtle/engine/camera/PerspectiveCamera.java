@@ -16,7 +16,7 @@ public class PerspectiveCamera extends Transform3D {
     private final Matrix4f perspectiveMatrix = new Matrix4f();
 
     public PerspectiveCamera(float aspectRatio, float fieldOfView, float near, float far) {
-        fov = fieldOfView;
+        fov = (float) Math.toRadians(fieldOfView);
         this.near = near;
         this.far = far;
         updateAspectRatio(aspectRatio);
@@ -24,7 +24,7 @@ public class PerspectiveCamera extends Transform3D {
 
     public void updateAspectRatio(float aspectRatio) {
         this.aspectRatio = aspectRatio;
-        perspectiveMatrix.perspective((float) Math.toRadians(fov), aspectRatio, near, far);
+        perspectiveMatrix.perspective(fov, aspectRatio, near, far);
         updateOrthographicMatrix();
     }
 
@@ -42,9 +42,9 @@ public class PerspectiveCamera extends Transform3D {
 
     public Matrix4f getViewMatrix() {
         return new Matrix4f().identity()
-                .rotateXYZ((float) Math.toRadians(rotation.x),
-                        (float) Math.toRadians(rotation.y),
-                        (float) Math.toRadians(rotation.z))
+                .rotateXYZ(rotation.x,
+                        rotation.y,
+                        rotation.z)
                 .translate(-position.x, -position.y, -position.z);
     }
 
@@ -59,9 +59,9 @@ public class PerspectiveCamera extends Transform3D {
     public Vector3f getDirection() {
         Quaternionf quaternionf = new Quaternionf();
         quaternionf.rotateYXZ(
-                (float) Math.toRadians(-getRotationY()),
-                (float) Math.toRadians(-getRotationX()),
-                (float) Math.toRadians(getRotationZ()));
+                -getRotationY(),
+                -getRotationX(),
+                getRotationZ());
         return new Vector3f(0, 0, -1).rotate(quaternionf);
     }
 

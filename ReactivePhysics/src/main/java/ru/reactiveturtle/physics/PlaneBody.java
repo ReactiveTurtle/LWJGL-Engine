@@ -15,7 +15,7 @@ public class PlaneBody extends RigidBody {
     @Override
     public CollisionResult isCollide(RigidBody rigidBody, int testCount) {
         return rigidBody instanceof PlaneBody ||
-                rigidBody instanceof HeightMap ?
+                rigidBody instanceof TerrainBody ?
                 new CollisionResult(false) :
                 rigidBody.isCollide(this, testCount);
     }

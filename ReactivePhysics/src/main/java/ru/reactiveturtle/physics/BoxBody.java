@@ -218,9 +218,12 @@ public class BoxBody extends RigidBody {
             translation.y = translationAxis.y;
             return new CollisionResult(false, isCollide, false);
         }
-        if (rigidBody instanceof HeightMap) {
-            HeightMap heightMap = (HeightMap) rigidBody;
-            float y = heightMap.getY(position.x, position.z);
+        if (rigidBody instanceof TerrainBody) {
+            TerrainBody terrainBody = (TerrainBody) rigidBody;
+            Float y = terrainBody.getY(position.x, position.z);
+            if (y == null) {
+                return new CollisionResult(false, false, false);
+            }
             float currentY = position.y + center.y;
             boolean isCollide = false;
             float yTranslation = 0;

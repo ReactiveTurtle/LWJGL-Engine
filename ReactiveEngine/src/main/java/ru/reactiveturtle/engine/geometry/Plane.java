@@ -42,6 +42,14 @@ public class Plane {
         return new Vector4f(xFactor, yFactor, zFactor, dFactor);
     }
 
+    public Vector3f getPosition() {
+        return new Vector3f(position);
+    }
+
+    public Vector3f getNormal() {
+        return new Vector3f(xFactor, yFactor, zFactor);
+    }
+
     public void render(Stage3D stage, Shader textureShader) {
         Sphere sphere = new Sphere(0.1f, 8, false);
         Sphere sphere2 = new Sphere(0.1f, 8, false);

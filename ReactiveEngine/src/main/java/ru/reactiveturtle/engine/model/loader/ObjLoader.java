@@ -4,7 +4,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import ru.reactiveturtle.engine.base.GameContext;
 import ru.reactiveturtle.engine.material.Material;
-import ru.reactiveturtle.engine.material.Texture;
+import ru.reactiveturtle.engine.texture.Texture;
 import ru.reactiveturtle.engine.model.Model;
 import ru.reactiveturtle.engine.model.mesh.Mesh;
 

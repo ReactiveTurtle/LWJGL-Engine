@@ -1,11 +1,11 @@
 package ru.reactiveturtle.game.player.inventory;
 
 
-import ru.reactiveturtle.game.types.Collectable;
+import ru.reactiveturtle.engine.toolkit.ReactiveList;
+import ru.reactiveturtle.game.base.Entity;
 
 public class Inventory {
-    private Collectable[] items = new Collectable[8];
-    private int[] itemsCount = new int[8];
+    private ReactiveList<InventoryItem> items = new ReactiveList<>(new InventoryItem[8]);
     private int currentItemPosition;
 
     public void wheelInventory(double dy) {
@@ -21,37 +21,44 @@ public class Inventory {
         return currentItemPosition;
     }
 
-    public Collectable getCurrentItem() {
-        return items[currentItemPosition];
+    public InventoryItem getCurrentItem() {
+        return items.get(currentItemPosition);
     }
 
-    public void addItem(int position, Collectable item) {
-        if (items[position] == null) {
-            items[position] = item;
+    public void addItem(int position, Entity entity) {
+        InventoryItem inventoryItem = items.get(position);
+        if (inventoryItem == null) {
+            inventoryItem = new InventoryItem(entity, 0);
+            items.set(position, inventoryItem);
         }
-        itemsCount[position]++;
+        inventoryItem.countUp(1);
     }
 
-    public void removeItem(int position) {
-        itemsCount[position]--;
-        if (itemsCount[position] == 0) {
-            items[position] = null;
+    public boolean removeItem(int position) {
+        InventoryItem inventoryItem = getItem(position);
+        if (inventoryItem == null || !inventoryItem.countDown(1)) {
+            return false;
         }
+        if (inventoryItem.getCount() == 0) {
+            items.set(position, null);
+        }
+        return true;
     }
 
-    public Collectable getItem(int position) {
-        return items[position];
+    public InventoryItem getItem(int position) {
+        return items.get(position);
+    }
+
+    public int getItemCount(int position) {
+        InventoryItem inventoryItem = items.get(position);
+        return inventoryItem == null ? 0 : inventoryItem.getCount();
+    }
+
+    public boolean isCellEmpty(int position) {
+        return getItem(position) == null;
     }
 
     public int getInventorySize() {
-        return items.length;
-    }
-
-    public Collectable[] getItems() {
-        return items;
-    }
-
-    public int[] getItemsCounter() {
-        return itemsCount;
+        return items.size();
     }
 }

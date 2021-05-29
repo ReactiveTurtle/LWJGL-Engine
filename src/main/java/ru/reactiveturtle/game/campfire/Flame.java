@@ -2,7 +2,7 @@ package ru.reactiveturtle.game.campfire;
 
 import org.joml.Vector3f;
 import ru.reactiveturtle.engine.base3d.Stage3D;
-import ru.reactiveturtle.engine.material.Texture;
+import ru.reactiveturtle.engine.texture.Texture;
 import ru.reactiveturtle.engine.particle.FlowParticle;
 import ru.reactiveturtle.engine.particle.Particle;
 import ru.reactiveturtle.engine.particle.ParticleInfo;

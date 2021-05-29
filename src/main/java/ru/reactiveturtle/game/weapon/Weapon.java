@@ -11,9 +11,8 @@ public abstract class Weapon extends Entity implements Collectable, Intersectabl
 
     public Weapon(WeaponData data,
                   int id,
-                  String name,
-                  EntityState... entityStates) {
-        super(id, name, entityStates);
+                  String name) {
+        super(id, name);
         weaponData = data;
     }
 

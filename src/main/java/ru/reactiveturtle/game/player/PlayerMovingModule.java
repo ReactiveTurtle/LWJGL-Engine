@@ -37,9 +37,9 @@ public class PlayerMovingModule extends MovingModule {
         }
         translation.mul((float) deltaTime);
         if (!player.isLockYMove()) {
-            translation.rotateX((float) Math.toRadians(-camera.getRotationX()));
+            translation.rotateX(-camera.getRotationX());
         }
-        translation.rotateY((float) Math.toRadians(-camera.getRotationY()));
+        translation.rotateY(-camera.getRotationY());
 
         if (player.isLockYMove()) {
             player.getRigidBody().translate(translation);

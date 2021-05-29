@@ -3,8 +3,8 @@ package ru.reactiveturtle.engine.ui;
 import ru.reactiveturtle.engine.base.Stage;
 import ru.reactiveturtle.engine.base2d.SquareShader;
 import ru.reactiveturtle.engine.base3d.Stage3D;
-import ru.reactiveturtle.engine.model.Disposeable;
-import ru.reactiveturtle.engine.model.Renderable;
+import ru.reactiveturtle.engine.base.Disposeable;
+import ru.reactiveturtle.engine.base.Renderable;
 import ru.reactiveturtle.engine.toolkit.ReactiveList;
 
 import static org.lwjgl.opengl.GL11.*;

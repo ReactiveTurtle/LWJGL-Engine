@@ -80,13 +80,11 @@ public class World {
     }
 
     public boolean removeRigidBody(RigidBody rigidBody) {
-        for (int i = 0; i < rigidBodies.size(); i++) {
-            if (rigidBodies.get(i).getId() != null && rigidBody.getId() != null
-                    && rigidBodies.get(i).getId().equals(rigidBody.getId())) {
-                rigidBodies.remove(i);
-                rigidBodyCollisions.remove(i);
-                return true;
-            }
+        int index = rigidBodies.indexOf(rigidBody);
+        if (index > -1) {
+            rigidBodies.remove(index);
+            rigidBodyCollisions.remove(index);
+            return true;
         }
         return false;
     }

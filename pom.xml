@@ -10,6 +10,12 @@
     <dependencies>
         <dependency>
             <groupId>ru.reactiveturtle</groupId>
+            <artifactId>ReactivePhysics</artifactId>
+            <version>1.0-beta</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>ru.reactiveturtle</groupId>
             <artifactId>ReactiveEngine</artifactId>
             <version>1.0-beta</version>
             <scope>compile</scope>
@@ -18,12 +24,6 @@
             <groupId>org.joml</groupId>
             <artifactId>joml</artifactId>
             <version>1.9.25</version>
-        </dependency>
-        <dependency>
-            <groupId>ru.reactiveturtle</groupId>
-            <artifactId>ReactivePhysics</artifactId>
-            <version>1.0-beta</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 

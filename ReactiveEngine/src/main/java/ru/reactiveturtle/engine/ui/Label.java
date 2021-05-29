@@ -11,6 +11,11 @@ import java.util.Objects;
 public class Label extends UIElement {
     public Label(UIContext uiContext, float relativeWidth, float relativeHeight) {
         super(uiContext, relativeWidth, relativeHeight);
+        setSizing(Sizing.FIXED);
+    }
+
+    public Label(UIContext uiContext) {
+        super(uiContext, 0, 0);
         setSizing(Sizing.ADAPT);
     }
 
@@ -78,15 +83,17 @@ public class Label extends UIElement {
             fontMetrics.getLineMetrics("String", labelTextDrawer);
 
             String maxLine = "";
+            int maxLineWidth = 0;
             for (String line : textLines) {
-                if (line.length() > maxLine.length()) {
+                int lineWidth = fontMetrics.stringWidth(line);
+                if (lineWidth > maxLineWidth) {
                     maxLine = line;
+                    maxLineWidth = lineWidth;
                 }
             }
             LineMetrics lineMetrics = fontMetrics.getLineMetrics(maxLine, labelTextDrawer);
-            int width = fontMetrics.stringWidth(maxLine);
             int height = (int) ((textLines.length) * lineMetrics.getHeight());
-            setSize(new Vector2i(width + 1, height + 1));
+            setSize(new Vector2i(maxLineWidth + 1, height + 1));
         } else if (sizing == Sizing.FIXED) {
             setSize(fixedSize);
         } else {

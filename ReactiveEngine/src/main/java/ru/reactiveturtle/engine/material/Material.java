@@ -1,6 +1,7 @@
 package ru.reactiveturtle.engine.material;
 
 import org.joml.Vector3f;
+import ru.reactiveturtle.engine.texture.Texture;
 
 import static org.lwjgl.opengl.GL11.GL_RGB;
 
@@ -19,7 +20,7 @@ public class Material {
     private float reflectance = 0;
 
     public Material() {
-        mTexture = new Texture(16, 16, GL_RGB);
+        mTexture = new Texture(16, 16, Texture.PixelFormat.RGB);
     }
 
     public Material(Texture texture) {

@@ -9,7 +9,7 @@ import org.lwjgl.opengl.GL30;
 import ru.reactiveturtle.engine.base.Shader;
 import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.material.Material;
-import ru.reactiveturtle.engine.model.Disposeable;
+import ru.reactiveturtle.engine.base.Disposeable;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -81,7 +81,7 @@ public class Mesh implements Disposeable {
         }
         glActiveTexture(GL_TEXTURE2);
         if (stage.getLights().get(0).getShadowMap() != null) {
-            GL11.glBindTexture(GL_TEXTURE_2D, stage.getLights().get(0).getShadowMap().getShadowTexture().getTextureId());
+            GL11.glBindTexture(GL_TEXTURE_2D, stage.getLights().get(0).getShadowMap().getDepthTexture().getTextureId());
         }
 
         shader.load(stage, modelMatrix, this);

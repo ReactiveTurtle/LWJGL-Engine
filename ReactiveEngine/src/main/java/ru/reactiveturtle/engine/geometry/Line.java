@@ -2,13 +2,16 @@ package ru.reactiveturtle.engine.geometry;
 
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import ru.reactiveturtle.engine.base.Value;
 
 public class Line {
     private Vector4f f1 = new Vector4f();
     private Vector4f f2 = new Vector4f();
+    private Vector3f position;
+    private Vector3f direction;
 
     public Line(Vector3f direction, Vector3f position) {
+        this.position = new Vector3f(position);
+        this.direction = new Vector3f(direction);
         f1.set(
                 direction.y,
                 -direction.x,
@@ -22,19 +25,17 @@ public class Line {
     }
 
     public Vector3f intersects(Plane plane) {
-        Vector4f f1 = new Vector4f(this.f1);
-        Vector4f f2 = new Vector4f(this.f2);
-        Vector4f f3 = plane.getFactors();
+        Vector3f planeNormal = plane.getNormal();
+        Vector3f planePosition = plane.getPosition();
 
-        if (f1.y == 0 || f2.z == 0) {
+        Vector3f lineDirection = direction;
+        Vector3f linePosition = position;
+
+        if (planeNormal.dot(lineDirection.normalize()) == 0) {
             return null;
         }
 
-        float x = ((f3.y * f1.w / f1.y) + (f3.z * f2.w / f2.z) - f3.w) /
-                (f3.x - (f3.y * f1.x / f1.y) - (f3.z * f2.x / f2.z));
-        float y = (-f1.w - f1.x * x) / f1.y;
-        float z = (-f2.w - f2.x * x) / f2.z;
-
-        return new Vector3f(x, y, z);
+        float t = (planeNormal.dot(planePosition) - planeNormal.dot(linePosition)) / planeNormal.dot(lineDirection.normalize());
+        return linePosition.add(lineDirection.normalize().mul(t));
     }
 }

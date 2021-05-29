@@ -1,41 +1,52 @@
 package ru.reactiveturtle.game.base;
 
 import org.joml.Vector3f;
+import ru.reactiveturtle.engine.base.Disposeable;
 import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.geometry.Frustum;
 import ru.reactiveturtle.engine.model.Model;
-import ru.reactiveturtle.engine.model.Renderable;
-import ru.reactiveturtle.engine.shadow.Shadow;
+import ru.reactiveturtle.engine.base.Renderable;
+import ru.reactiveturtle.engine.shadow.ShadowRenderable;
 import ru.reactiveturtle.game.Helper;
+import ru.reactiveturtle.game.Log;
 import ru.reactiveturtle.game.world.BoxBodyModel;
 import ru.reactiveturtle.physics.BoxBody;
-import ru.reactiveturtle.physics.Transform3D;
 
-public class EntityState extends Transform3D implements Shadow, Renderable<Stage3D> {
+public class EntityState implements ShadowRenderable, Renderable<Stage3D>, Disposeable {
+    private Entity entity;
+
     private Model model;
     private BoxBody body;
     private boolean isInFrustum = false;
     private boolean isInFrustumCalled = false;
 
-    public EntityState(Model model, BoxBody body) {
+    public EntityState(Entity entity, Model model, BoxBody body) {
+        this.entity = entity;
         this.model = model;
         this.body = body;
     }
 
     @Override
     public void render(Stage3D stage) {
+        Vector3f position = entity.getPosition();
+        Vector3f rotation = entity.getRotation();
+
+        body.setPosition(position);
+        body.setRotation(rotation);
+
         Frustum frustum = stage.getCamera().getFrustum();
         boolean isInFrustum = frustum.isFigureInFrustum(body.getBoxPoints());
         if (isInFrustum) {
-            System.out.println("In frustum: " + model.getMeshes().keySet().toArray()[0]);
-            model.setPosition(getBody().getPosition());
-            model.setRotation(getBody().getRotation());
+            Log.addInFrustumEntityKey((String) model.getMeshes().keySet().toArray()[0]);
+
+            model.setPosition(position);
+            model.setRotation(rotation);
             model.render(stage);
 
             // For debugging
-            BoxBodyModel boxBodyModel = Helper.bodyToModel(body);
+            /*BoxBodyModel boxBodyModel = Helper.bodyToModel(body);
             boxBodyModel.setShader(model.getShader());
-            boxBodyModel.render(stage);
+            boxBodyModel.render(stage);*/
         }
     }
 
@@ -54,31 +65,16 @@ public class EntityState extends Transform3D implements Shadow, Renderable<Stage
         }
     }
 
-    @Override
-    public void setPosition(float x, float y, float z) {
-        model.setPosition(x, y, z);
-    }
-
-    @Override
-    public void setRotation(float x, float y, float z) {
-        model.setRotation(x, y, z);
-    }
-
-    @Override
-    public Vector3f getPosition() {
-        return model.getPosition();
-    }
-
-    @Override
-    public Vector3f getRotation() {
-        return model.getRotation();
-    }
-
     public BoxBody getBody() {
         return body;
     }
 
     public Model getModel() {
         return model;
+    }
+
+    @Override
+    public void dispose() {
+
     }
 }

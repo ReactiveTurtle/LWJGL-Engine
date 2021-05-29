@@ -4,9 +4,9 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import ru.reactiveturtle.engine.base3d.Stage3D;
-import ru.reactiveturtle.engine.model.Disposeable;
+import ru.reactiveturtle.engine.base.Disposeable;
 import ru.reactiveturtle.engine.model.mesh.Mesh;
-import ru.reactiveturtle.engine.material.Texture;
+import ru.reactiveturtle.engine.texture.Texture;
 
 import java.util.HashMap;
 

@@ -4,9 +4,12 @@ import ru.reactiveturtle.engine.base.GameContext;
 import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.base2d.Square;
 import ru.reactiveturtle.engine.base2d.SquareShader;
-import ru.reactiveturtle.engine.material.Texture;
+import ru.reactiveturtle.engine.texture.Texture;
+import ru.reactiveturtle.engine.ui.UIContext;
+import ru.reactiveturtle.engine.ui.UIElement;
 import ru.reactiveturtle.game.base.Entity;
 import ru.reactiveturtle.game.player.inventory.Inventory;
+import ru.reactiveturtle.game.player.inventory.InventoryItem;
 import ru.reactiveturtle.game.types.Collectable;
 import ru.reactiveturtle.game.types.Container;
 import ru.reactiveturtle.game.types.Destructible;
@@ -22,22 +25,18 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
 
 public class Interface {
-    private Square center;
+    private UIElement center;
 
     private Square health;
     private BufferedImage healthImage;
     private Graphics2D healthDrawer;
 
-    private Square log;
-    private BufferedImage logImage;
-    private Graphics2D logDrawer;
-
-    private Square inventory;
+    private UIElement inventory;
     private BufferedImage inventoryBase;
     private BufferedImage inventoryImage;
     private Graphics2D inventoryDrawer;
 
-    private Square needs;
+    private UIElement needs;
     private BufferedImage needsHungerIcon;
     private BufferedImage needsImage;
     private Graphics2D needsDrawer;
@@ -46,10 +45,7 @@ public class Interface {
     private BufferedImage takeNotificationImage;
     private Graphics2D takeNotificationDrawer;
 
-    private SquareShader squareShader;
-
-    public Interface(float aspectRatio) {
-        squareShader = new SquareShader();
+    public Interface(UIContext uiContext) {
         healthImage = new BufferedImage(256, 16, BufferedImage.TYPE_INT_ARGB);
         healthDrawer = healthImage.createGraphics();
         healthDrawer.setColor(new Color(0, 0, 0, 128));
@@ -59,25 +55,15 @@ public class Interface {
         health = new Square(0.3f, 0.01875f,
                 new Texture(healthImage),
                 1f, 1f);
-        health.setPosition(-1f * aspectRatio + health.getWidth() * 1.2f, -1f + health.getHeight() + health.getWidth() * 0.2f, 0);
-        health.setShader(squareShader);
+        health.setPosition(-1f * uiContext.getScreenAspectRatio() + health.getWidth() * 1.2f, -1f + health.getHeight() + health.getWidth() * 0.2f, 0);
 
         BufferedImage image = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics = image.createGraphics();
         graphics.setColor(Color.WHITE);
         graphics.fillOval(0, 0, 256, 256);
-        center = new Square(0.0125f, 0.0125f, new Texture(image), 1f, 1f);
-        center.setShader(squareShader);
-
-        logImage = new BufferedImage(512, 512, BufferedImage.TYPE_INT_ARGB);
-        logDrawer = logImage.createGraphics();
-        Font font = logDrawer.getFont();
-        font = font.deriveFont(24f);
-        font = font.deriveFont(Font.PLAIN);
-        logDrawer.setFont(font);
-        log = new Square(1f, 1f, new Texture(logImage), 1f, 1f);
-        log.setPosition(-1f * aspectRatio + log.getWidth(), 1f - log.getHeight(), 0);
-        log.setShader(squareShader);
+        center = new UIElement(uiContext, 0.0125f, 0.0125f);
+        center.setTexture(new Texture(image));
+        uiContext.getUILayout().add(center);
 
         inventoryBase = new BufferedImage(512, 64, BufferedImage.TYPE_INT_ARGB);
         try {
@@ -92,56 +78,22 @@ public class Interface {
             inventoryDrawer.setColor(Color.RED);
             inventoryDrawer.setStroke(new BasicStroke(2));
             inventoryDrawer.setFont(inventoryDrawer.getFont().deriveFont(16f));
-            inventory = new Square(0.8f, 0.1f, new Texture(inventoryImage), 1f, 1f);
+            inventory = new UIElement(uiContext, 0.8f, 0.1f);
+            inventory.setTexture(new Texture(inventoryImage));
             inventory.setY(-1f + inventory.getHeight());
-            inventory.setShader(squareShader);
-
-            takeNotificationImage = new BufferedImage(256, 128, BufferedImage.TYPE_INT_ARGB);
-            takeNotificationDrawer = takeNotificationImage.createGraphics();
-            font = takeNotificationDrawer.getFont();
-            font = font.deriveFont(24f);
-            font = font.deriveFont(Font.PLAIN);
-            takeNotificationDrawer.setFont(font);
-            takeNotification = new Square(0.4f, 0.2f, new Texture(takeNotificationImage), 1f, 1f);
-            takeNotification.setShader(squareShader);
-            takeNotification.setY(takeNotification.getHeight());
+            uiContext.getUILayout().add(inventory);
 
             needsImage = new BufferedImage(512, 256, BufferedImage.TYPE_INT_ARGB);
             needsDrawer = needsImage.createGraphics();
             needsHungerIcon = ImageIO.read(new File(GameContext.RESOURCE_PATH + "/texture/hunger.png"));
-            needs = new Square(0.2f, 0.1f, new Texture(needsImage), 1f, 1f);
-            needs.setShader(squareShader);
-            needs.setPosition(-1f * aspectRatio + needs.getWidth() + health.getWidth() * 0.2f,
+            needs = new UIElement(uiContext, 0.2f, 0.1f);
+            needs.setTexture(new Texture(needsImage));
+            needs.setPosition(-1f * uiContext.getScreenAspectRatio() + needs.getWidth() + health.getWidth() * 0.2f,
                     -1f + needs.getHeight() + health.getWidth() * 0.2f + health.getHeight() * 4f, 0);
+            uiContext.getUILayout().add(needs);
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public void render(Stage3D stage, double deltaTime) {
-        boolean isDepthTestEnabled = glIsEnabled(GL_DEPTH_TEST);
-        if (isDepthTestEnabled) {
-            glDisable(GL_DEPTH_TEST);
-        }
-        squareShader.bind();
-        health.draw(stage);
-        center.draw(stage);
-        log.draw(stage);
-        inventory.draw(stage);
-        takeNotification.draw(stage);
-        needs.draw(stage);
-        squareShader.unbind();
-        if (isDepthTestEnabled) {
-            glEnable(GL_DEPTH_TEST);
-        }
-    }
-
-    public void setIntersectionText(String string) {
-        logDrawer.setComposite(AlphaComposite.Clear);
-        logDrawer.fillRect(0, 0, 1024, 128);
-        logDrawer.setComposite(AlphaComposite.SrcOver);
-        logDrawer.drawString(string, 4, 24);
-        log.getTexture().set(logImage);
     }
 
     private static BufferedImage copyImage(BufferedImage source) {
@@ -150,31 +102,6 @@ public class Interface {
         g.drawImage(source, 0, 0, null);
         g.dispose();
         return b;
-    }
-
-    public void notify(Entity entity) {
-        clearDrawer(takeNotificationDrawer, takeNotificationImage.getWidth(), takeNotificationImage.getHeight());
-        if (entity != null) {
-            takeNotificationDrawer.drawString(entity.getName(),
-                    getXCenterLocation(takeNotificationDrawer, takeNotificationImage.getWidth(), entity.getName()),
-                    24);
-            String secondLine = null;
-            if (entity instanceof Collectable && entity.getName().length() > 0) {
-                secondLine = "Press E";
-            } else if (entity instanceof Destructible) {
-                secondLine = ((Destructible) entity).getStrength() + " %";
-            } else if (entity instanceof Container) {
-                if (entity instanceof Firebox) {
-                    secondLine = "Time: " + toNormalTime(((Firebox) entity).getBurningTime());
-                }
-            }
-            if (secondLine != null) {
-                takeNotificationDrawer.drawString(secondLine,
-                        getXCenterLocation(takeNotificationDrawer, takeNotificationImage.getWidth(), secondLine),
-                        52);
-            }
-        }
-        takeNotification.getTexture().set(takeNotificationImage);
     }
 
     private int getXCenterLocation(Graphics2D graphics2D, int width, String string) {
@@ -211,7 +138,7 @@ public class Interface {
         inventoryDrawer.drawImage(inventoryBase, 0, 0, null);
         inventoryDrawer.drawRoundRect(inventory.getCurrentItemPosition() * 64 + 2, 2, 60, 60, 16, 16);
         for (int i = 0; i < 8; i++) {
-            String count = inventory.getItemsCounter()[i] + "";
+            String count = inventory.getItemCount(i) + "";
             inventoryDrawer.drawString(count, (i + 1) * 64 - inventoryDrawer.getFontMetrics().stringWidth(count) - 8,
                     64 - 8);
         }
