@@ -1,14 +1,17 @@
 package ru.reactiveturtle.game.campfire;
 
 import org.joml.Vector3f;
+import ru.reactiveturtle.engine.base.Shader;
 import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.light.PointLight;
 import ru.reactiveturtle.engine.model.Model;
 import ru.reactiveturtle.engine.model.loader.ObjLoader;
 import ru.reactiveturtle.engine.particle.ParticleShader;
 import ru.reactiveturtle.engine.shader.TextureShader;
+import ru.reactiveturtle.game.MainGame;
 import ru.reactiveturtle.game.base.Entity;
-import ru.reactiveturtle.game.base.EntityState;
+import ru.reactiveturtle.game.base.EntityPhase;
+import ru.reactiveturtle.game.base.ModelLoader;
 import ru.reactiveturtle.game.types.Collectable;
 import ru.reactiveturtle.game.types.Combustible;
 import ru.reactiveturtle.game.types.Firebox;
@@ -22,8 +25,8 @@ public class Campfire extends Entity implements Firebox {
     private PointLight mPointLight;
     private Vector3f mDiffuse;
 
-    public Campfire(int id, String name, TextureShader textureShader, ParticleShader particleShader) {
-        super(id, name);
+    public Campfire(MainGame gameContext, String name, TextureShader textureShader, ParticleShader particleShader) {
+        super(gameContext, name);
         try {
             mStone = ObjLoader.load("object/campfire/campfire_stone");
             mStone.setShader(textureShader);
@@ -95,8 +98,13 @@ public class Campfire extends Entity implements Firebox {
     }
 
     @Override
-    protected EntityState[] getDefaultEntityStates() {
-        return new EntityState[0];
+    protected EntityPhase[] getDefaultEntityPhases(ModelLoader modelLoader) {
+        return new EntityPhase[0];
+    }
+
+    @Override
+    protected Shader initShader() {
+        return null;
     }
 
     @Override

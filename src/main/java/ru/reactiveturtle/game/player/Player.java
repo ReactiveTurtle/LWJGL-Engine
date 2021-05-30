@@ -2,22 +2,22 @@ package ru.reactiveturtle.game.player;
 
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import ru.reactiveturtle.engine.base.GameContext;
 import ru.reactiveturtle.engine.base.Stage;
 import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.base.Transform3D;
 import ru.reactiveturtle.engine.module.moving.Movable;
-import ru.reactiveturtle.engine.shader.TextureShader;
 import ru.reactiveturtle.engine.shadow.ShadowRenderable;
-import ru.reactiveturtle.game.Helper;
+import ru.reactiveturtle.game.MainGame;
 import ru.reactiveturtle.game.base.Entity;
+import ru.reactiveturtle.game.base.ModelLoader;
 import ru.reactiveturtle.game.player.inventory.Inventory;
 import ru.reactiveturtle.game.player.inventory.InventoryItem;
 import ru.reactiveturtle.game.types.Builder;
 import ru.reactiveturtle.game.types.Destroyer;
-import ru.reactiveturtle.game.world.BoxBodyModel;
 import ru.reactiveturtle.physics.BoxBody;
 import ru.reactiveturtle.physics.RigidBody;
+
+import java.util.Objects;
 
 public class Player extends Transform3D implements Movable, ShadowRenderable {
     private boolean isLockYMove = false;
@@ -52,24 +52,26 @@ public class Player extends Transform3D implements Movable, ShadowRenderable {
 
     private Vector3f cameraPosition = new Vector3f();
 
-    private TextureShader textureShader;
+    private MainGame gameContext;
 
-    public Player(GameContext gameContext) {
+    public Player(MainGame gameContext) {
+        Objects.requireNonNull(gameContext);
+        this.gameContext = gameContext;
+
         setMovement(Movement.WALK);
-        textureShader = new TextureShader();
-        mUI = new Interface(gameContext.getStage().getUIContext());
+        mUI = new Interface(this.gameContext.getStage().getUIContext());
         mInventory = new Inventory();
         mUI.updateInventoryImage(mInventory);
         mNeeds = new Needs();
         initRigidBody();
 
-        gameContext.setCursorCallback(bias -> {
+        this.gameContext.setCursorCallback(bias -> {
             float biasX = bias.y;
             float biasY = bias.x;
             addRotation((float) Math.toRadians(biasX), (float) Math.toRadians(biasY), 0);
         });
 
-        gameContext.getStage().setMouseCallback(new Stage.MouseCallback() {
+        this.gameContext.getStage().setMouseCallback(new Stage.MouseCallback() {
             @Override
             public void onScroll(int direction) {
                 super.onScroll(direction);
@@ -221,10 +223,12 @@ public class Player extends Transform3D implements Movable, ShadowRenderable {
                 getRotationX(),
                 getRotationZ());
 
-        Vector3f vector3f = new Vector3f(0, 0, 1);
+        Vector3f vector3f = new Vector3f(0, 0, 2);
         vector3f.rotate(quaternionf);
 
-        return item.takeEntity();
+        Entity entity = item.takeEntity(gameContext);
+        entity.setPosition(getPosition().add(vector3f));
+        return entity;
     }
 
     public void wheelInventory(double dy) {
@@ -264,7 +268,6 @@ public class Player extends Transform3D implements Movable, ShadowRenderable {
         }
         if (mRightHandItem != null) {
             InventoryItem tool = mRightHandItem;
-            tool.updatePositionAndRotationRelativelyPlayer(getCameraPosition(), getRotation());
             tool.render(stage);
         }
 

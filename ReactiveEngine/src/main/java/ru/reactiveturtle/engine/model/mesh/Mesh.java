@@ -13,6 +13,7 @@ import ru.reactiveturtle.engine.base.Disposeable;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Objects;
 
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL13.*;
@@ -58,6 +59,7 @@ public class Mesh implements Disposeable {
     }
 
     public void render(Stage3D stage, Shader shader, Matrix4f modelMatrix) {
+        Objects.requireNonNull(shader);
         if (!shader.isBind()) {
             throw new IllegalStateException("Shader must be bind for correct rendering");
         }

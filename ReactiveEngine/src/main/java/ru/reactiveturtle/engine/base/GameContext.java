@@ -240,9 +240,7 @@ public abstract class GameContext implements Disposeable {
 
     public void updateKeyCallback() {
         if (stage != null) {
-            glfwSetKeyCallback(windowId, stage.keyCallback == null ? null : (window, key, scancode, action, mods) -> {
-                stage.keyCallback.onChange(key, action);
-            });
+            glfwSetKeyCallback(windowId, stage.keyCallback == null ? null : (window, key, scancode, action, mods) -> stage.keyCallback.onChange(key, action));
         }
     }
 

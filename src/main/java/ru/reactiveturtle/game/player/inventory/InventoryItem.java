@@ -1,17 +1,17 @@
 package ru.reactiveturtle.game.player.inventory;
 
-import org.joml.Vector3f;
 import ru.reactiveturtle.engine.base.Renderable;
 import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.shadow.ShadowRenderable;
-import ru.reactiveturtle.engine.toolkit.Pair;
+import ru.reactiveturtle.game.MainGame;
 import ru.reactiveturtle.game.base.Entity;
+import ru.reactiveturtle.game.base.EntityArchive;
 import ru.reactiveturtle.game.types.Collectable;
 
 import java.util.Objects;
 
 public class InventoryItem implements Renderable<Stage3D>, ShadowRenderable {
-    private Entity entity;
+    private EntityArchive entityArchive;
     private int count;
 
     public InventoryItem(Entity entity, int count) {
@@ -19,25 +19,18 @@ public class InventoryItem implements Renderable<Stage3D>, ShadowRenderable {
             throw new IllegalStateException("Entity should be implements with \"Collectable\"");
         }
         Objects.requireNonNull(entity);
-        this.entity = entity;
+        this.entityArchive = new EntityArchive(entity);
         this.count = count;
     }
 
     @Override
     public void render(Stage3D stage) {
-        entity.getCurrentState().getModel().render(stage);
+        entityArchive.getModel().render(stage);
     }
 
     @Override
     public void renderShadow(Stage3D stage) {
-        entity.getCurrentState().getModel().renderShadow(stage);
-    }
-
-    public void updatePositionAndRotationRelativelyPlayer(Vector3f position, Vector3f rotation) {
-        Collectable collectable = (Collectable) entity;
-        Pair<Vector3f> pair = collectable.getPositionAndRotationRelativelyPlayer(position, rotation);
-        entity.getCurrentState().getModel().setPosition(pair.first);
-        entity.getCurrentState().getModel().setRotation(pair.second);
+        entityArchive.getModel().renderShadow(stage);
     }
 
     public void countUp(int count) {
@@ -60,12 +53,10 @@ public class InventoryItem implements Renderable<Stage3D>, ShadowRenderable {
     }
 
     public String getEntityTag() {
-        return entity.getTag();
+        return entityArchive.getTag();
     }
 
-    public Entity takeEntity() {
-        Entity entity = this.entity;
-        this.entity = null;
-        return entity;
+    public Entity takeEntity(MainGame gameContext) {
+        return entityArchive.build(gameContext);
     }
 }

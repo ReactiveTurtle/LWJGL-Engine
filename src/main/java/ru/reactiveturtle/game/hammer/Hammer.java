@@ -1,16 +1,24 @@
 package ru.reactiveturtle.game.hammer;
 
+import ru.reactiveturtle.engine.base.Shader;
+import ru.reactiveturtle.game.MainGame;
 import ru.reactiveturtle.game.base.Entity;
-import ru.reactiveturtle.game.base.EntityState;
+import ru.reactiveturtle.game.base.EntityPhase;
+import ru.reactiveturtle.game.base.ModelLoader;
 
 public class Hammer extends Entity {
-    public Hammer(int id, String name) {
-        super(id, name);
+    public Hammer(MainGame gameContext, String name) {
+        super(gameContext, name);
     }
 
     @Override
-    protected EntityState[] getDefaultEntityStates() {
-        return new EntityState[0];
+    protected EntityPhase[] getDefaultEntityPhases(ModelLoader modelLoader) {
+        return new EntityPhase[0];
+    }
+
+    @Override
+    protected Shader initShader() {
+        return null;
     }
 
     @Override

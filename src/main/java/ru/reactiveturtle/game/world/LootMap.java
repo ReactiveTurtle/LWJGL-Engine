@@ -10,19 +10,15 @@ import ru.reactiveturtle.game.base.Entity;
 import ru.reactiveturtle.game.types.Intersectable;
 import ru.reactiveturtle.game.weapon.DragunovSniperRifle;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class LootMap implements Renderable<Stage3D>, ShadowRenderable {
     private final ReactiveList<Entity> lootMap = new ReactiveList<>();
 
-    public LootMap(Physic physic, TextureShader textureShader) {
-        generateWeapons(physic, textureShader);
+    public LootMap(MainGame gameContext, Physic physic) {
+        generateWeapons(gameContext, physic);
     }
 
-    private void generateWeapons(Physic physic, TextureShader textureShader) {
-        DragunovSniperRifle dsr = new DragunovSniperRifle(MainGame.generateId());
-        dsr.getCurrentState().getModel().setShader(textureShader);
+    private void generateWeapons(MainGame gameContext, Physic physic) {
+        DragunovSniperRifle dsr = new DragunovSniperRifle(gameContext);
         physic.putBody(dsr.getCurrentState().getBody());
         lootMap.add(dsr);
     }

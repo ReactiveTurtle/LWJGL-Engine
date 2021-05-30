@@ -1,18 +1,18 @@
 package ru.reactiveturtle.game.weapon;
 
 import ru.reactiveturtle.engine.camera.PerspectiveCamera;
+import ru.reactiveturtle.game.MainGame;
 import ru.reactiveturtle.game.base.Entity;
-import ru.reactiveturtle.game.base.EntityState;
 import ru.reactiveturtle.game.types.Collectable;
 import ru.reactiveturtle.game.types.Intersectable;
 
 public abstract class Weapon extends Entity implements Collectable, Intersectable {
     private WeaponData weaponData;
 
-    public Weapon(WeaponData data,
-                  int id,
-                  String name) {
-        super(id, name);
+    public Weapon(MainGame gameContext,
+                  String name,
+                  WeaponData data) {
+        super(gameContext, name);
         weaponData = data;
     }
 

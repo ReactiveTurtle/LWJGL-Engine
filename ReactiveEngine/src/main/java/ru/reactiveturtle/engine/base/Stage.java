@@ -19,7 +19,7 @@ public abstract class Stage {
 
     public abstract void render();
 
-    protected final GameContext gameContext;
+    private final GameContext gameContext;
 
     /**
      * Returns game context

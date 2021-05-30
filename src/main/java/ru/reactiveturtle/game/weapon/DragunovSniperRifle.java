@@ -1,40 +1,33 @@
 package ru.reactiveturtle.game.weapon;
 
 import org.joml.Vector3f;
-import ru.reactiveturtle.engine.texture.Texture;
-import ru.reactiveturtle.engine.model.Model;
-import ru.reactiveturtle.engine.model.loader.ObjLoader;
-import ru.reactiveturtle.engine.toolkit.Pair;
-import ru.reactiveturtle.game.base.EntityState;
+import ru.reactiveturtle.engine.base.Shader;
+import ru.reactiveturtle.game.MainGame;
+import ru.reactiveturtle.game.base.EntityPhase;
+import ru.reactiveturtle.game.base.ModelLoader;
 import ru.reactiveturtle.game.types.Collectable;
 import ru.reactiveturtle.physics.BoxBody;
 import ru.reactiveturtle.physics.RigidBody;
 
-import java.io.IOException;
-
 public class DragunovSniperRifle extends Weapon {
-    public DragunovSniperRifle(int id) {
-        super(getDefaultWeaponData(), id, "Dragunov Sniper Rifle");
+    public DragunovSniperRifle(MainGame gameContext) {
+        super(gameContext, "Dragunov Sniper Rifle", getDefaultWeaponData());
         setRotationX((float) (Math.PI / 2));
     }
 
-    protected EntityState[] getDefaultEntityStates() {
-        try {
-            Model model = ObjLoader.load("object/weapon/DSR", 1, 1);
-            model.getMeshes().values().iterator().next().getMaterial()
-                    .setTexture(new Texture("object/weapon/DSR.bmp"));
-            model.setScale(0.625f);
-            BoxBody boxBody = new BoxBody(new Vector3f(2.25f, 0.8f, 0.15f));
-            boxBody.setCenter(new Vector3f(-0.6f, 0f, 0));
-            boxBody.setType(RigidBody.Type.DYNAMIC);
-            boxBody.setY(6f);
-            return new EntityState[]{
-                    new EntityState(this, model, boxBody)
-            };
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    protected EntityPhase[] getDefaultEntityPhases(ModelLoader modelLoader) {
+        BoxBody boxBody = new BoxBody(new Vector3f(2.25f, 0.8f, 0.15f));
+        boxBody.setCenter(new Vector3f(-0.6f, 0f, 0));
+        boxBody.setType(RigidBody.Type.DYNAMIC);
+        boxBody.setY(6f);
+        return new EntityPhase[]{
+                new EntityPhase(this, modelLoader.getDragunovSniperRiffle(), boxBody)
+        };
+    }
+
+    @Override
+    protected Shader initShader() {
+        return gameContext.getShaderLoader().getTextureShader();
     }
 
     private static WeaponData getDefaultWeaponData() {
@@ -70,10 +63,5 @@ public class DragunovSniperRifle extends Weapon {
     @Override
     public int getCount() {
         return 0;
-    }
-
-    @Override
-    public Pair<Vector3f> getPositionAndRotationRelativelyPlayer(Vector3f playerCameraPosition, Vector3f playerCameraRotation) {
-        return new Pair<>(new Vector3f(0), new Vector3f(0));
     }
 }

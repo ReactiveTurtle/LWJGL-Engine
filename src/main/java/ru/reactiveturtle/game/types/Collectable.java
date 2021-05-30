@@ -11,6 +11,4 @@ public interface Collectable {
     void setCount(int count);
 
     int getCount();
-
-    Pair<Vector3f> getPositionAndRotationRelativelyPlayer(Vector3f playerCameraPosition, Vector3f playerCameraRotation);
 }

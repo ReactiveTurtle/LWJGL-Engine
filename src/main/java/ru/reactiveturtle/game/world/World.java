@@ -1,7 +1,6 @@
 package ru.reactiveturtle.game.world;
 
 import org.joml.Vector3f;
-import ru.reactiveturtle.engine.base.GameContext;
 import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.camera.PerspectiveCamera;
 import ru.reactiveturtle.engine.material.Material;
@@ -12,7 +11,9 @@ import ru.reactiveturtle.engine.shader.TextureShader;
 import ru.reactiveturtle.engine.toolkit.MathExtensions;
 import ru.reactiveturtle.engine.ui.Label;
 import ru.reactiveturtle.game.Log;
+import ru.reactiveturtle.game.MainGame;
 import ru.reactiveturtle.game.base.Entity;
+import ru.reactiveturtle.game.base.ModelLoader;
 import ru.reactiveturtle.game.player.Player;
 import ru.reactiveturtle.game.player.PlayerMovingModule;
 import ru.reactiveturtle.game.types.Collectable;
@@ -39,8 +40,9 @@ public class World extends Stage3D {
 
     private Sun sun;
     private Sphere sphere;
+    private ModelLoader modelLoader;
 
-    public World(GameContext gameContext) {
+    public World(MainGame gameContext) {
         super(gameContext);
     }
 
@@ -48,10 +50,11 @@ public class World extends Stage3D {
 
     @Override
     public void start() {
+        modelLoader = new ModelLoader();
         setCamera(new PerspectiveCamera(getGameContext().getAspectRatio(), 67f, 0.01f, 10000f));
         dayNight = new DayNight();
         physic = new Physic();
-        player = new Player(gameContext);
+        player = new Player((MainGame) getGameContext());
         TextureShader textureShader = new TextureShader();
 
         setKeyCallback((key, action) -> {
@@ -95,6 +98,7 @@ public class World extends Stage3D {
                         if (player.takeObservable()) {
                             physic.removeBody(observable.getCurrentState().getBody());
                             lootMap.remove(observable.getId());
+                            observable.dispose();
                             intersectionLabel.setText("");
                         }
                         break;
@@ -153,7 +157,7 @@ public class World extends Stage3D {
                 physic.putBody(terrainBody);
             }
         }
-        lootMap = new LootMap(physic, textureShader);
+        lootMap = new LootMap((MainGame) getGameContext(), physic);
 
         playerMovingModule = new PlayerMovingModule(this);
 
@@ -170,7 +174,7 @@ public class World extends Stage3D {
 
         logLabel = new Label(uiContext);
         logLabel.setFontSize(40);
-        logLabel.setPosition(logLabel.getWidth() - gameContext.getAspectRatio(), 1 - logLabel.getHeight(), 0);
+        logLabel.setPosition(logLabel.getWidth() - getGameContext().getAspectRatio(), 1 - logLabel.getHeight(), 0);
         logLabel.setBackground(0, 0, 0, 0x42);
         uiContext.getUILayout().add(logLabel);
 
@@ -238,6 +242,11 @@ public class World extends Stage3D {
         playerPosition.x = MathExtensions.round(playerPosition.x, 1);
         playerPosition.y = MathExtensions.round(playerPosition.y, 1);
         playerPosition.z = MathExtensions.round(playerPosition.z, 1);
+        String observable = "";
+        if (player.getObservableEntity() != null) {
+            Entity entity = player.getObservableEntity();
+            observable = entity.toString();
+        }
         logLabel.setText("x: " + playerPosition.x
                 + "\ny: " + playerPosition.y
                 + "\nz: " + playerPosition.z
@@ -245,7 +254,8 @@ public class World extends Stage3D {
                 + "\nx: " + MathExtensions.round(camera.getX(), 1)
                 + "\ny: " + MathExtensions.round(camera.getY(), 1)
                 + "\nz: " + MathExtensions.round(camera.getZ(), 1)
-                + "\n" + Log.inFrustum);
-        logLabel.setPosition(logLabel.getWidth() - gameContext.getAspectRatio(), 1 - logLabel.getHeight(), 0);
+                + "\n" + Log.inFrustum
+                + observable);
+        logLabel.setPosition(logLabel.getWidth() - getGameContext().getAspectRatio(), 1 - logLabel.getHeight(), 0);
     }
 }

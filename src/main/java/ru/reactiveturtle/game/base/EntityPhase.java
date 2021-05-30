@@ -12,7 +12,7 @@ import ru.reactiveturtle.game.Log;
 import ru.reactiveturtle.game.world.BoxBodyModel;
 import ru.reactiveturtle.physics.BoxBody;
 
-public class EntityState implements ShadowRenderable, Renderable<Stage3D>, Disposeable {
+public class EntityPhase implements ShadowRenderable, Renderable<Stage3D>, Disposeable {
     private Entity entity;
 
     private Model model;
@@ -20,7 +20,7 @@ public class EntityState implements ShadowRenderable, Renderable<Stage3D>, Dispo
     private boolean isInFrustum = false;
     private boolean isInFrustumCalled = false;
 
-    public EntityState(Entity entity, Model model, BoxBody body) {
+    public EntityPhase(Entity entity, Model model, BoxBody body) {
         this.entity = entity;
         this.model = model;
         this.body = body;
@@ -44,10 +44,14 @@ public class EntityState implements ShadowRenderable, Renderable<Stage3D>, Dispo
             model.render(stage);
 
             // For debugging
-            /*BoxBodyModel boxBodyModel = Helper.bodyToModel(body);
-            boxBodyModel.setShader(model.getShader());
-            boxBodyModel.render(stage);*/
+            debug(stage);
         }
+    }
+
+    private void debug(Stage3D stage) {
+        BoxBodyModel boxBodyModel = Helper.bodyToModel(body);
+        boxBodyModel.setShader(model.getShader());
+        boxBodyModel.render(stage);
     }
 
     @Override

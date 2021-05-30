@@ -61,4 +61,11 @@ public abstract class RigidBody extends Transform3D implements Cloneable {
     public enum Type {
         STATIC, DYNAMIC, EMPTY
     }
+
+    @Override
+    public String toString() {
+        return "RigidBody{" +
+                "type=" + type +
+                '}';
+    }
 }
