@@ -3,7 +3,11 @@
 #define MAX_LIGHTS_COUNT 16
 
 struct Material {
-    int hasNormalMap;
+    int textureExists;
+    sampler2D textureSampler;
+    int normalMapTextureExists;
+    sampler2D normalMapTextureSampler;
+
     vec4 ambient;
     vec4 diffuse;
     vec4 specular;
@@ -16,8 +20,9 @@ struct DirectionalLight {
     vec4 ambient;
     vec4 diffuse;
     vec4 specular;
-    mat4 modelLightViewProjectionMatrix;
-    sampler2D shadowMap;
+    mat4 mvpMatrix;
+    int shadowMapTextureExists;
+    sampler2D shadowMapTextureSampler;
 };
 
 struct Attenuation {
@@ -45,25 +50,19 @@ struct SpotLight {
     float exponent;
 };
 
-in vec2 textureCoordinates;
-in vec4 vertex;
-in vec3 vertexNormal;
-in vec4 modelWorldPosition;
+in vec3 fVertex;
+vec4 fVertex4;
 
-in mat4 f_modelViewMatrix;
+in vec2 fTextureCoordinate;
+in vec3 fVertexNormal;
 
 out vec4 fragColor;
-
-uniform sampler2D textureSampler;
-uniform sampler2D normalMap;
-
-uniform mat3 normalMatrix;
 
 uniform int materialExists;
 uniform Material material;
 
-uniform int directionalLightsCount;
-uniform DirectionalLight directionalLights[2];
+uniform int directionalLightExists;
+uniform DirectionalLight directionalLight;
 
 uniform int pointLightsCount;
 uniform PointLight pointLights[MAX_LIGHTS_COUNT];
@@ -71,10 +70,14 @@ uniform PointLight pointLights[MAX_LIGHTS_COUNT];
 uniform int spotLightsCount;
 uniform SpotLight spotLights[MAX_LIGHTS_COUNT];
 
-uniform vec3 cameraPosition;
+uniform mat4 fProjectionMatrix;
+uniform mat4 fViewMatrix;
+uniform mat4 fModelMatrix;
 
 vec3 normal;
 vec3 cameraDirection;
+
+vec4 modelVertexPosition;
 
 float calcShadow(sampler2D shadowMap, vec4 position) {
     vec3 projCoords = position.xyz * 0.5 + 0.5;
@@ -101,31 +104,26 @@ float calcShadow(sampler2D shadowMap, vec4 position) {
 }
 
 vec4 getDirectionalLightColor() {
-    vec4 result = vec4(0);
-    for (int i = 0; i < directionalLightsCount; i++) {
+    vec3 lightDirection = normalize(directionalLight.direction.xyz);
 
-        vec3 lightDirection = normalize(vec3(directionalLights[i].direction));
+    vec4 color = material.emission;
 
-        vec4 color = material.emission;
+    color += material.ambient * directionalLight.ambient;
 
-        color += material.ambient * directionalLights[i].ambient;
+    float nDotL = max(dot(normal, lightDirection), 0.0f);
+    color += material.diffuse * directionalLight.diffuse * nDotL;
 
-        float nDotL = max(dot(normal, lightDirection), 0.0f);
-        color += material.diffuse * directionalLights[i].diffuse * nDotL;
+    float rDotVPow = max(pow(dot(reflect(-lightDirection, normal), cameraDirection), material.reflectance), 0.0f);
+    color += material.specular * directionalLight.specular * rDotVPow;
 
-        float rDotVPow = max(pow(dot(reflect(-lightDirection, normal), cameraDirection), material.reflectance), 0.0f);
-        color += material.specular * directionalLights[i].specular * rDotVPow;
-
-        color += clamp(color * calcShadow(directionalLights[i].shadowMap, directionalLights[i].modelLightViewProjectionMatrix * vertex), 0, 1);
-        result = max(result, color);
-    }
-    return result;
+    color += clamp(color * calcShadow(directionalLight.shadowMapTextureSampler, directionalLight.mvpMatrix * fVertex4), vec4(0), vec4(1));
+    return color;
 }
 
 vec4 getPointLightColor() {
-    vec4 result = vec4(0);
+    vec4 result;
     for (int i = 0; i < pointLightsCount; i++) {
-        vec4 lightDir = pointLights[i].position - modelWorldPosition;
+        vec4 lightDir = pointLights[i].position - modelVertexPosition;
 
         float distance = length(lightDir);
 
@@ -145,13 +143,15 @@ vec4 getPointLightColor() {
         color += material.specular * pointLights[i].specular * rDotVPow * att;
         result = max(result, color);
     }
-    return max(result, 0);
+    return clamp(result, vec4(0), vec4(1));
 }
 
-vec4 getSpotLightColor() {
+vec4 getSpotLightColor()
+{
     vec4 result;
-    for (int i = 0; i < spotLightsCount; i++) {
-        vec4 lightDir = spotLights[i].position - modelWorldPosition;
+    for (int i = 0; i < spotLightsCount; i++)
+    {
+        vec4 lightDir = spotLights[i].position - modelVertexPosition;
 
         float distance = length(lightDir);
 
@@ -175,35 +175,35 @@ vec4 getSpotLightColor() {
         color += material.specular * spotLights[i].specular * rDotVPow * att;
         result = max(result, color);
     }
-    return result;
+    return clamp(result, vec4(0), vec4(1));
 }
 
-vec3 calcNormal(Material material, vec3 normal, vec2 text_coord, mat4 modelViewMatrix)
+vec3 calcNormal(Material material, vec3 normal, vec2 textureCoordinate, mat4 modelViewMatrix)
 {
-    vec3 newNormal = normal;
-    if (material.hasNormalMap == 1) {
-        newNormal = texture2D(normalMap, text_coord).rgb;
-        newNormal = normalize(newNormal * 2 - 1);
-        newNormal = normalize(modelViewMatrix * vec4(newNormal, 0.0)).xyz;
+    if (material.normalMapTextureExists == 0) {
+        return normal;
     }
+    vec3 newNormal = texture2D(material.normalMapTextureSampler, textureCoordinate).rgb;
+    newNormal = normalize(newNormal * 2.0 - 1);
+    newNormal = normalize(modelViewMatrix * vec4(newNormal, 0.0)).xyz;
     return newNormal;
 }
 
 void main() {
     if (materialExists == 0) {
-        fragColor = texture(textureSampler, textureCoordinates);
+        fragColor = vec4(0, 0.8, 0, 1);
     } else if (materialExists == 1) {
-        normal = calcNormal(material, normalize(normalMatrix * vertexNormal), textureCoordinates, f_modelViewMatrix);
-        cameraDirection = normalize(cameraPosition - vec3(modelWorldPosition));
-        if (directionalLightsCount > 0) {
-            fragColor = max(fragColor, getDirectionalLightColor());
-        }
-        if (pointLightsCount > 0) {
-            fragColor = max(fragColor, getPointLightColor());
-        }
-        if (spotLightsCount > 0) {
-            fragColor = max(fragColor, getSpotLightColor());
-        }
-        fragColor *= texture(textureSampler, textureCoordinates);
+        fVertex4 = vec4(fVertex, 1);
+        mat4 viewModelMatrix = fViewMatrix * fModelMatrix;
+        mat3 normalModelMatrix = transpose(mat3(inverse(fModelMatrix)));
+        modelVertexPosition = fModelMatrix * vec4(fVertex4);
+        vec3 viewPosition = vec3(fViewMatrix[3][0], fViewMatrix[3][1], fViewMatrix[3][2]);
+
+        cameraDirection = normalize(viewPosition - vec3(modelVertexPosition));
+        normal = calcNormal(material, normalize(normalModelMatrix * fVertexNormal), fTextureCoordinate, viewModelMatrix);
+        fragColor = getDirectionalLightColor();
+        fragColor = max(fragColor, getPointLightColor());
+        fragColor = max(fragColor, getSpotLightColor());
+        fragColor *= texture(material.textureSampler, fTextureCoordinate);
     }
 }

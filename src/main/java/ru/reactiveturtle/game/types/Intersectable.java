@@ -1,6 +1,6 @@
 package ru.reactiveturtle.game.types;
 
-import ru.reactiveturtle.engine.camera.PerspectiveCamera;
+import ru.reactiveturtle.engine.camera.Camera;
 
 public interface Intersectable {
     /**
@@ -8,5 +8,5 @@ public interface Intersectable {
      * @return must return null when direction isn't intersects object
      * or must return distance to object when direction intersects it
      */
-    Float intersect(PerspectiveCamera camera);
+    Float intersect(Camera camera);
 }

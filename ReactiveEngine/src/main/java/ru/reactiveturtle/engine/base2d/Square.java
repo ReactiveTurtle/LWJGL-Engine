@@ -34,7 +34,7 @@ public class Square extends Transform3D implements Disposeable {
     public void resize(float width, float height, float textureX, float textureY) {
         this.width = width;
         this.height = height;
-        mesh.resize(MESH_NAME, getVertices(width, height), getIndices());
+        mesh.setVertices(getVertices(width, height), getIndices());
         mesh.setTextureCoordinates(new float[]{
                 0, 0,
                 0, textureX,

@@ -4,9 +4,8 @@ import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.texture.Texture;
 import ru.reactiveturtle.engine.model.terrain.Terrain;
 import ru.reactiveturtle.engine.base.Renderable;
-import ru.reactiveturtle.engine.shader.TextureShader;
+import ru.reactiveturtle.engine.shader.ModelShader;
 import ru.reactiveturtle.game.generator.HeightMapGenerator;
-import ru.reactiveturtle.physics.TerrainBody;
 
 public class Chunk implements Renderable<Stage3D> {
     public static final int X_PARTS = 32;
@@ -24,7 +23,7 @@ public class Chunk implements Renderable<Stage3D> {
         terrain = HeightMapGenerator.generateHeightMap(seed, x, y, texture);
     }
 
-    public void setShader(TextureShader shader) {
+    public void setShader(ModelShader shader) {
         terrain.setShader(shader);
     }
 

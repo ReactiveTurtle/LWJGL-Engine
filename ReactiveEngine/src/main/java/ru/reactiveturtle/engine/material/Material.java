@@ -3,11 +3,9 @@ package ru.reactiveturtle.engine.material;
 import org.joml.Vector3f;
 import ru.reactiveturtle.engine.texture.Texture;
 
-import static org.lwjgl.opengl.GL11.GL_RGB;
-
 public class Material {
-    private Texture mTexture;
-    private Texture mNormalMap;
+    private Texture texture;
+    private Texture normalMapTexture;
     //Восприятие фонового освещения
     private Vector3f ambient = new Vector3f(0, 0, 0);
     //Восприятие рассеяного освещения
@@ -20,32 +18,32 @@ public class Material {
     private float reflectance = 0;
 
     public Material() {
-        mTexture = new Texture(16, 16, Texture.PixelFormat.RGB);
+        texture = new Texture(16, 16, Texture.PixelFormat.RGB);
     }
 
     public Material(Texture texture) {
-        mTexture = texture;
+        this.texture = texture;
     }
 
-    public Material(Texture texture, Texture normalMap) {
-        mTexture = texture;
-        mNormalMap = normalMap;
+    public Material(Texture texture, Texture normalMapTexture) {
+        this.texture = texture;
+        this.normalMapTexture = normalMapTexture;
     }
 
     public void setTexture(Texture texture) {
-        this.mTexture = texture;
+        this.texture = texture;
     }
 
     public Texture getTexture() {
-        return mTexture;
+        return texture;
     }
 
-    public void setNormalMap(Texture normalMap) {
-        mNormalMap = normalMap;
+    public void setNormalMapTexture(Texture normalMap) {
+        this.normalMapTexture = normalMap;
     }
 
-    public Texture getNormalMap() {
-        return mNormalMap;
+    public Texture getNormalMapTexture() {
+        return normalMapTexture;
     }
 
     public void setAmbient(Vector3f ambient) {
@@ -106,7 +104,7 @@ public class Material {
 
     public Material copy() {
         Material material = new Material();
-        if (mTexture != null) material.setTexture(mTexture);
+        if (texture != null) material.setTexture(texture);
         material.setAmbient(ambient);
         material.setDiffuse(diffuse);
         material.setSpecular(specular);

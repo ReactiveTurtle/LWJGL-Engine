@@ -1,5 +1,6 @@
 package ru.reactiveturtle.physics;
 
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -37,47 +38,40 @@ public class TerrainBody extends RigidBody {
 
     public Float getY(float x, float z) {
         try {
-            x -= getX();
-            z -= getZ();
-            if (!(-width / 2 <= x && x <= width / 2 && -height / 2 <= z && z <= height / 2)) {
-                return null;
-            }
+            float mapX = (x + width / 2f + getX()) / width * (textureWidth);
+            float mapZ = (z + height / 2f + getZ()) / height * (textureHeight);
 
-            float mapX = (x + width / 2) / width * textureWidth;
-            float mapZ = (z + height / 2) / height * textureHeight;
+            float mapModX = (float) (mapX - Math.floor(mapX));
+            float mapModZ = (float) (mapZ - Math.floor(mapZ));
 
             mapX = (int) mapX;
             mapZ = (int) mapZ;
 
-            int positionLeftTop = ((int) (mapZ * (textureWidth - 1)
-                    + mapX)) * 18 + 3;
+            int positionLeftTop = ((int) (mapZ * (textureWidth) + mapX)) * 18 + 3;
             int positionRightTop = positionLeftTop + 3;
             int positionLeftBottom = positionLeftTop - 3;
             int positionRightBottom = positionLeftTop + 9;
 
-            Vector3f position = new Vector3f(x, 0, z);
-            Vector3f leftTop = new Vector3f(vertices[positionLeftTop], vertices[positionLeftTop + 1], vertices[positionLeftTop + 2]);
-            Vector3f rightTop = new Vector3f(vertices[positionRightTop], vertices[positionRightTop + 1], vertices[positionRightTop + 2]);
-            Vector3f leftBottom = new Vector3f(vertices[positionLeftBottom], vertices[positionLeftBottom + 1], vertices[positionLeftBottom + 2]);
-            Vector3f rightBottom = new Vector3f(vertices[positionRightBottom], vertices[positionRightBottom + 1], vertices[positionRightBottom + 2]);
-
-            Plane[] leftTopTrianglePlanes = {
-                    new Plane(leftBottom, leftTop, new Vector3f(leftTop.x, leftTop.y - 1, leftTop.z)),
-                    new Plane(leftTop, rightTop, new Vector3f(rightTop.x, rightTop.y - 1, rightTop.z)),
-                    new Plane(rightTop, leftBottom, new Vector3f(leftBottom.x, leftBottom.y - 1, leftBottom.z))
-            };
-            Plane plane;
-            if (leftTopTrianglePlanes[0].isPointAtFrontOrIn(position) &&
-                    !leftTopTrianglePlanes[1].isPointAtFrontOrIn(position) &&
-                    leftTopTrianglePlanes[2].isPointAtFrontOrIn(position)) {
-                plane = new Plane(leftBottom, leftTop, rightTop);
-                return leftTop.y;
+            Vector3f A = new Vector3f(vertices[positionRightTop], vertices[positionRightTop + 1], vertices[positionRightTop + 2]);
+            Vector3f C = new Vector3f(vertices[positionLeftBottom], vertices[positionLeftBottom + 1], vertices[positionLeftBottom + 2]);
+            if (new Vector2f(x, z).sub(new Vector2f(vertices[positionLeftTop], vertices[positionLeftTop + 2])).length() <
+                    new Vector2f(x, z).sub(new Vector2f(vertices[positionRightBottom], vertices[positionRightBottom + 2])).length()) {
+                Vector3f B = new Vector3f(vertices[positionLeftTop], vertices[positionLeftTop + 1], vertices[positionLeftTop + 2]);
+                float xsFactor = (B.y - A.y) * (C.z - A.z) - (B.z - A.z) * (C.y - A.y);
+                float ysFactor = -((B.x - A.x) * (C.z - A.z) - (B.z - A.z) * (C.x - A.x));
+                float zsFactor = (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x);
+                float D = -A.x * xsFactor - A.y * ysFactor - A.z * zsFactor;
+                return (-xsFactor * x - zsFactor * z - D) / ysFactor;
             } else {
-                plane = new Plane(leftBottom, rightBottom, rightTop);
-                return rightBottom.y;
+                Vector3f B = new Vector3f(vertices[positionRightBottom], vertices[positionRightBottom + 1], vertices[positionRightBottom + 2]);
+                float xsFactor = (B.y - A.y) * (C.z - A.z) - (B.z - A.z) * (C.y - A.y);
+                float ysFactor = -((B.x - A.x) * (C.z - A.z) - (B.z - A.z) * (C.x - A.x));
+                float zsFactor = (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x);
+                float D = -A.x * xsFactor - A.y * ysFactor - A.z * zsFactor;
+                return (-xsFactor * x - zsFactor * z - D) / ysFactor;
             }
         } catch (IndexOutOfBoundsException e) {
-            return null;
+            return -200f;
         }
     }
 }

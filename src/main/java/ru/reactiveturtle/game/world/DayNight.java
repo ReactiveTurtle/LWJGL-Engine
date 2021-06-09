@@ -52,7 +52,7 @@ public class DayNight {
                 skyColor.set(117 / 255f, 187 / 255f, 253 / 255f);
             }
         }
-        directionalLight.getDirection().set((float) Math.cos(Math.PI - angle), (float) Math.sin(angle), 0);
+        directionalLight.setDirection((float) Math.cos(Math.PI - angle), (float) Math.sin(angle), 0);
         Vector3f skyColor = new Vector3f(this.skyColor).mul(directionalLight.getDirection().y);
         glClearColor(skyColor.x,
                 skyColor.y,

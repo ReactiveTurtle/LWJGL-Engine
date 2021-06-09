@@ -2,7 +2,7 @@ package ru.reactiveturtle.game.player;
 
 import org.joml.Vector3f;
 import ru.reactiveturtle.engine.base3d.Stage3D;
-import ru.reactiveturtle.engine.camera.PerspectiveCamera;
+import ru.reactiveturtle.engine.camera.Camera;
 import ru.reactiveturtle.engine.module.moving.Movable;
 import ru.reactiveturtle.engine.module.moving.MovingModule;
 
@@ -21,7 +21,7 @@ public class PlayerMovingModule extends MovingModule {
     public Vector3f move(Movable movable) {
         Player player = (Player) movable;
         double deltaTime = stage.getGameContext().getDeltaTime();
-        PerspectiveCamera camera = stage.getCamera();
+        Camera camera = stage.getCamera();
         Vector3f translation = new Vector3f();
         if (stage.getGameContext().isKeyPressed(GLFW_KEY_W)) {
             translation.z = -player.getMovementSpeed();
@@ -42,7 +42,7 @@ public class PlayerMovingModule extends MovingModule {
         translation.rotateY(-camera.getRotationY());
 
         if (player.isLockYMove()) {
-            player.getRigidBody().translate(translation);
+            player.getRigidBody().translate(translation.mul(10));
         }
         return translation;
     }

@@ -7,7 +7,7 @@ import ru.reactiveturtle.engine.light.PointLight;
 import ru.reactiveturtle.engine.model.Model;
 import ru.reactiveturtle.engine.model.loader.ObjLoader;
 import ru.reactiveturtle.engine.particle.ParticleShader;
-import ru.reactiveturtle.engine.shader.TextureShader;
+import ru.reactiveturtle.engine.shader.ModelShader;
 import ru.reactiveturtle.game.MainGame;
 import ru.reactiveturtle.game.base.Entity;
 import ru.reactiveturtle.game.base.EntityPhase;
@@ -25,13 +25,13 @@ public class Campfire extends Entity implements Firebox {
     private PointLight mPointLight;
     private Vector3f mDiffuse;
 
-    public Campfire(MainGame gameContext, String name, TextureShader textureShader, ParticleShader particleShader) {
+    public Campfire(MainGame gameContext, String name, ModelShader modelShader, ParticleShader particleShader) {
         super(gameContext, name);
         try {
             mStone = ObjLoader.load("object/campfire/campfire_stone");
-            mStone.setShader(textureShader);
+            mStone.setShader(modelShader);
             mFirewood = ObjLoader.load("object/campfire/firewood");
-            mFirewood.setShader(textureShader);
+            mFirewood.setShader(modelShader);
             mFirewood.setScale(1.25f);
 
             mFlame = new Flame(particleShader);

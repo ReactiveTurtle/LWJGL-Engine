@@ -224,4 +224,8 @@ public abstract class Shader implements Disposeable {
                 return "unknown";
         }
     }
+
+    protected static int toBoolInt(Object obj) {
+        return obj == null ? 0 : 1;
+    }
 }

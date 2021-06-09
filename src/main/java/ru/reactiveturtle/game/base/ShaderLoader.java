@@ -1,18 +1,18 @@
 package ru.reactiveturtle.game.base;
 
 import ru.reactiveturtle.engine.base.Disposeable;
-import ru.reactiveturtle.engine.shader.TextureShader;
+import ru.reactiveturtle.engine.shader.ModelShader;
 import ru.reactiveturtle.engine.toolkit.Value;
 
 public final class ShaderLoader implements Disposeable {
     public ShaderLoader() {
     }
 
-    private Value<TextureShader> textureShader = new Value<>();
+    private Value<ModelShader> textureShader = new Value<>();
 
-    public TextureShader getTextureShader() {
+    public ModelShader getTextureShader() {
         if (!textureShader.hasValue()) {
-            textureShader.value = new TextureShader();
+            textureShader.value = new ModelShader();
         }
         return textureShader.value;
     }

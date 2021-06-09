@@ -2,12 +2,12 @@ package ru.reactiveturtle.game.world;
 
 import org.joml.Vector3f;
 import ru.reactiveturtle.engine.base3d.Stage3D;
-import ru.reactiveturtle.engine.camera.PerspectiveCamera;
+import ru.reactiveturtle.engine.camera.Camera;
 import ru.reactiveturtle.engine.material.Material;
-import ru.reactiveturtle.engine.texture.Texture;
 import ru.reactiveturtle.engine.model.base.Sphere;
 import ru.reactiveturtle.engine.module.moving.MovingModule;
-import ru.reactiveturtle.engine.shader.TextureShader;
+import ru.reactiveturtle.engine.shader.ModelShader;
+import ru.reactiveturtle.engine.texture.Texture;
 import ru.reactiveturtle.engine.toolkit.MathExtensions;
 import ru.reactiveturtle.engine.ui.Label;
 import ru.reactiveturtle.game.Log;
@@ -24,10 +24,6 @@ import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
-import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
-import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
 public class World extends Stage3D {
     private MovingModule playerMovingModule;
@@ -51,11 +47,11 @@ public class World extends Stage3D {
     @Override
     public void start() {
         modelLoader = new ModelLoader();
-        setCamera(new PerspectiveCamera(getGameContext().getAspectRatio(), 67f, 0.01f, 10000f));
+        setCamera(new Camera(getGameContext().getAspectRatio(), 67f, 0.01f, 10000f));
         dayNight = new DayNight();
         physic = new Physic();
         player = new Player((MainGame) getGameContext());
-        TextureShader textureShader = new TextureShader();
+        ModelShader modelShader = new ModelShader();
 
         setKeyCallback((key, action) -> {
             if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
@@ -140,12 +136,13 @@ public class World extends Stage3D {
             }
         });
 
-        addLight(dayNight.getLight());
+        setDirectionalLight(dayNight.getLight());
+
         Texture texture = new Texture("texture/sand.jpg");
         for (int i = -10; i < 10; i++) {
             for (int j = -10; j < 10; j++) {
                 Chunk chunk = new Chunk(314124, j, i, texture);
-                chunk.setShader(textureShader);
+                chunk.setShader(modelShader);
                 chunks.add(chunk);
                 TerrainBody terrainBody = new TerrainBody(
                         chunk.getTerrain().getVertices(),
@@ -167,9 +164,9 @@ public class World extends Stage3D {
         sphereMaterial.setAmbient(0.1f, 0.1f, 0.2f);
         sphereMaterial.setDiffuse(0.7f, 0.4f, 0.4f);
         sphere.setMaterial(sphereMaterial);
-        sphere.setShader(textureShader);
+        sphere.setShader(modelShader);
 
-        sun = new Sun(textureShader);
+        sun = new Sun(modelShader);
         sun.setPosition(0, 40, 0);
 
         logLabel = new Label(uiContext);
@@ -211,7 +208,10 @@ public class World extends Stage3D {
     public void render() {
         Log.inFrustum = "";
         double deltaTime = getGameContext().getDeltaTime();
-        PerspectiveCamera camera = getCamera();
+        if (getGameContext().isKeyPressed(GLFW_KEY_1)) {
+            deltaTime *= 40 * 30;
+        }
+        Camera camera = getCamera();
         Vector3f playerTranslation = playerMovingModule.move(player);
 
         camera.setRotation(player.getRotation());
@@ -224,11 +224,9 @@ public class World extends Stage3D {
             camera.setPosition(player.getCameraPosition());
         }
 
-        getGameContext().getShadowManager().renderShadow(this, player);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, getGameContext().width, getGameContext().height);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        getGameContext().getShadowManager().renderShadow(this,
+                player,
+                lootMap);
 
         dayNight.update(deltaTime);
         for (Chunk chunk : chunks) {
@@ -237,6 +235,7 @@ public class World extends Stage3D {
         lootMap.render(this);
         sun.render(this);
         player.render(this, deltaTime);
+        sphere.render(this);
 
         Vector3f playerPosition = player.getPosition();
         playerPosition.x = MathExtensions.round(playerPosition.x, 1);
@@ -247,6 +246,10 @@ public class World extends Stage3D {
             Entity entity = player.getObservableEntity();
             observable = entity.toString();
         }
+        int chunkX = (int) (playerPosition.x / Chunk.CHUNK_WIDTH);
+        int chunkZ = (int) (playerPosition.z / Chunk.CHUNK_DEPTH);
+        int index = (chunkZ + 10) * 20 + chunkX + 10;
+        Chunk chunk = chunks.get(index);
         logLabel.setText("x: " + playerPosition.x
                 + "\ny: " + playerPosition.y
                 + "\nz: " + playerPosition.z
@@ -254,6 +257,11 @@ public class World extends Stage3D {
                 + "\nx: " + MathExtensions.round(camera.getX(), 1)
                 + "\ny: " + MathExtensions.round(camera.getY(), 1)
                 + "\nz: " + MathExtensions.round(camera.getZ(), 1)
+                + "\nchunkX: " + chunk.getTerrain().getX()
+                + "\nchunkZ: " + chunk.getTerrain().getZ()
+                + "\nchunkX: " + chunkX
+                + "\nchunkZ: " + chunkZ
+                + "\nindex: " + index
                 + "\n" + Log.inFrustum
                 + observable);
         logLabel.setPosition(logLabel.getWidth() - getGameContext().getAspectRatio(), 1 - logLabel.getHeight(), 0);

@@ -4,17 +4,17 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import ru.reactiveturtle.engine.base.Shader;
 import ru.reactiveturtle.engine.base3d.Stage3D;
-import ru.reactiveturtle.engine.camera.PerspectiveCamera;
+import ru.reactiveturtle.engine.camera.Camera;
 
 public class Frustum {
     private final Plane[] planes = new Plane[6];
 
-    public Frustum(PerspectiveCamera camera) {
+    public Frustum(Camera camera) {
         Vector3f cameraDirection = camera.getDirection();
         Quaternionf quaternionf = new Quaternionf();
         quaternionf.rotateYXZ(
                 -camera.getRotationY(),
-                (float) (Math.PI / 2 - camera.getRotationX() - camera.getFOV()),
+                (float) (Math.PI / 2 - camera.getRotationX() - camera.getFieldOfView()),
                 0);
 
         planes[0] = new Plane(camera.getPosition(), cameraDirection);
@@ -23,13 +23,13 @@ public class Frustum {
                 new Vector3f(cameraDirection).negate());
 
         planes[1] = new Plane(camera.getPosition(), new Vector3f(0, 0, -1).rotate(quaternionf));
-        quaternionf.rotateX((float) (-Math.PI + camera.getFOV() * 2));
+        quaternionf.rotateX((float) (-Math.PI + camera.getFieldOfView() * 2));
         planes[2] = new Plane(camera.getPosition(), new Vector3f(0, 0, -1).rotate(quaternionf));
 
-        quaternionf.rotateX((float) (Math.PI / 2 - camera.getFOV()));
-        quaternionf.rotateY((float) (Math.PI / 2 - camera.getFOV()));
+        quaternionf.rotateX((float) (Math.PI / 2 - camera.getFieldOfView()));
+        quaternionf.rotateY((float) (Math.PI / 2 - camera.getFieldOfView()));
         planes[3] = new Plane(camera.getPosition(), new Vector3f(0, 0, -1).rotate(quaternionf));
-        quaternionf.rotateY((float) (-Math.PI + camera.getFOV() * 2));
+        quaternionf.rotateY((float) (-Math.PI + camera.getFieldOfView() * 2));
         planes[4] = new Plane(camera.getPosition(), new Vector3f(0, 0, -1).rotate(quaternionf));
     }
 

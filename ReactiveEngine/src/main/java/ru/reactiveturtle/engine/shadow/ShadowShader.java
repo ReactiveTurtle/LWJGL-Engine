@@ -6,7 +6,7 @@ import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.light.DirectionalLight;
 import ru.reactiveturtle.engine.model.mesh.Mesh;
 import ru.reactiveturtle.engine.base.Shader;
-import ru.reactiveturtle.engine.camera.Camera;
+import ru.reactiveturtle.engine.camera.CameraExtensions;
 
 public class ShadowShader extends Shader {
     private int projectionMatrixLocation;
@@ -32,12 +32,12 @@ public class ShadowShader extends Shader {
 
     @Override
     public void load(Stage3D stage, Matrix4f modelMatrix, Mesh mesh) {
-        DirectionalLight directionalLight = stage.getGameContext().getShadowManager().renderingDirectionalLight;
+        DirectionalLight directionalLight = stage.getDirectionalLight();
         if (stage.getCamera() != null && directionalLight != null) {
             Matrix4f lightViewMatrix = new Matrix4f().identity()
                     .lookAt(directionalLight.getDirection(), new Vector3f(0, 0, 0), new Vector3f(0, 1, 0));
             super.loadMatrix4fUniform(projectionMatrixLocation,
-                    Camera.getOrtho());
+                    CameraExtensions.getOrtho());
             super.loadMatrix4fUniform(viewMatrixLocation, lightViewMatrix
                     .mul(stage.getCamera().getFlatTranslationMatrix())
             );

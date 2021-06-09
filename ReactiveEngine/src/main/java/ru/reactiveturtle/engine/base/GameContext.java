@@ -131,7 +131,7 @@ public abstract class GameContext implements Disposeable {
 
         glfwShowWindow(windowId);
 
-        mShadowManager = new ShadowManager();
+        mShadowManager = new ShadowManager(this);
         run();
 
         if (cursorCallback != null) {

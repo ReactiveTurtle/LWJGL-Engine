@@ -1,6 +1,7 @@
 package ru.reactiveturtle.engine.light;
 
 import org.joml.Vector3f;
+import ru.reactiveturtle.engine.shadow.ShadowMap;
 
 public class DirectionalLight extends Light {
     private Vector3f direction = new Vector3f(0, 0, 0);
@@ -11,6 +12,8 @@ public class DirectionalLight extends Light {
     //Мощность отражённого освещения
     private Vector3f specular = new Vector3f(0, 0, 0);
 
+    private ShadowMap shadowMap;
+
     public void setDirection(Vector3f direction) {
         this.direction.set(direction);
     }
@@ -20,7 +23,7 @@ public class DirectionalLight extends Light {
     }
 
     public Vector3f getDirection() {
-        return direction;
+        return new Vector3f(direction);
     }
 
     public void setAmbient(Vector3f ambient) {
@@ -57,6 +60,14 @@ public class DirectionalLight extends Light {
 
     public Vector3f getSpecular() {
         return specular;
+    }
+
+    public void setShadowMap(ShadowMap shadowMap) {
+        this.shadowMap = shadowMap;
+    }
+
+    public ShadowMap getShadowMap() {
+        return shadowMap;
     }
 
     public DirectionalLight copy() {

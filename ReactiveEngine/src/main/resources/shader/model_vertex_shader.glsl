@@ -1,29 +1,21 @@
 #version 330 core
 
-in vec3 position;
-in vec2 inTextureCoordinates;
-in vec3 inVertexNormals;
+in vec3 vVertex;
+in vec2 vTextureCoordinate;
+in vec3 vVertexNormal;
 
-out vec2 textureCoordinates;
-out vec3 vertexNormal;
+out vec3 fVertex;
+out vec2 fTextureCoordinate;
+out vec3 fVertexNormal;
 
-out vec4 vertex;
-out vec4 modelWorldPosition;
-out mat4 f_modelViewMatrix;
-
-uniform mat4 perspectiveProjection;
-uniform mat4 viewMatrix;
-uniform mat4 modelMatrix;
+uniform mat4 vProjectionMatrix;
+uniform mat4 vViewMatrix;
+uniform mat4 vModelMatrix;
 
 void main() {
-    gl_Position = perspectiveProjection * viewMatrix * modelMatrix * vec4(position, 1);
+    gl_Position = vProjectionMatrix * vViewMatrix * vModelMatrix * vec4(vVertex, 1);
 
-    modelWorldPosition = modelMatrix * vec4(position, 1);
-
-    textureCoordinates = inTextureCoordinates;
-
-    f_modelViewMatrix = viewMatrix * modelMatrix;
-
-    vertex = vec4(position, 1);
-    vertexNormal = inVertexNormals;
+    fVertex = vVertex;
+    fTextureCoordinate = vTextureCoordinate;
+    fVertexNormal = vVertexNormal;
 }

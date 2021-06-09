@@ -1,8 +1,11 @@
 package ru.reactiveturtle.game.generator;
 
+import org.joml.Math;
+import org.lwjgl.system.MathUtil;
 import ru.reactiveturtle.engine.material.Material;
 import ru.reactiveturtle.engine.texture.Texture;
 import ru.reactiveturtle.engine.model.terrain.Terrain;
+import ru.reactiveturtle.engine.toolkit.MathExtensions;
 
 import java.util.Random;
 
@@ -53,38 +56,16 @@ public class HeightMapGenerator {
         return terrain;
     }
 
-    public static float getHeight(long seed, int x, int y) {
-        float left = genSmoothNumber(seed, x - 1, y);
-        float leftTop = genSmoothNumber(seed, x - 1, y - 1);
-        float top = genSmoothNumber(seed, x, y - 1);
-        float rightTop = genSmoothNumber(seed, x + 1, y - 1);
-        float right = genSmoothNumber(seed, x + 1, y);
-        float rightBottom = genSmoothNumber(seed, x + 1, y + 1);
-        float bottom = genSmoothNumber(seed, x, y + 1);
-        float leftBottom = genSmoothNumber(seed, x - 1, y + 1);
-        float center = genSmoothNumber(seed, x, y);
-        return (left / 8 + leftTop / 8 + top / 8 + rightTop / 8 +
-                right / 8 + rightBottom / 8 + bottom / 8 + leftBottom / 8) * 0;
+    public static float getHeight(long seed, float x, float y) {
+        return (genNumber(seed, x, y) / 2 + 0.5f) * 255;
     }
 
-    public static float genSmoothNumber(long seed, int x, int y) {
-        float left = genNumber(seed, x - 1, y);
-        float leftTop = genNumber(seed, x - 1, y - 1);
-        float top = genNumber(seed, x, y - 1);
-        float rightTop = genNumber(seed, x + 1, y - 1);
-        float right = genNumber(seed, x + 1, y);
-        float rightBottom = genNumber(seed, x + 1, y + 1);
-        float bottom = genNumber(seed, x, y + 1);
-        float leftBottom = genNumber(seed, x - 1, y + 1);
-        float center = genNumber(seed, x, y);
-        return (left / 8 + leftTop / 8 + top / 8 + rightTop / 8 +
-                right / 8 + rightBottom / 8 + bottom / 8 + leftBottom / 8);
-    }
-
-    public static float genNumber(long seed, int x, int y) {
-        long factor1 = seed - (x * y);
-        long factor2 = factor1 * (x - y);
-        Random random = new Random((int) (factor1 * (x - y - factor2 * factor2) * x * y));
-        return random.nextFloat();
+    private static float genNumber(long seed, float x, float z) {
+        double dx = x / CHUNK_WIDTH;
+        double dz = z / CHUNK_DEPTH;
+        Random random = new Random(seed);
+        double frequencyX = random.nextDouble() * 2 + 2;
+        double frequencyY = random.nextDouble() * 2 + 2;
+        return (float) MathExtensions.noise(dx * frequencyX + seed, dz * frequencyY + seed);
     }
 }

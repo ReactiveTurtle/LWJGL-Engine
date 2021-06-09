@@ -2,10 +2,14 @@ package ru.reactiveturtle.engine.base3d;
 
 import ru.reactiveturtle.engine.base.GameContext;
 import ru.reactiveturtle.engine.base.Stage;
-import ru.reactiveturtle.engine.camera.PerspectiveCamera;
+import ru.reactiveturtle.engine.camera.Camera;
+import ru.reactiveturtle.engine.light.DirectionalLight;
 import ru.reactiveturtle.engine.light.Light;
+import ru.reactiveturtle.engine.light.PointLight;
+import ru.reactiveturtle.engine.light.SpotLight;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -16,28 +20,55 @@ public abstract class Stage3D extends Stage {
         super(gameContext);
     }
 
-    private PerspectiveCamera camera;
+    private Camera camera;
 
-    public void setCamera(PerspectiveCamera camera) {
+    public void setCamera(Camera camera) {
         this.camera = camera;
     }
 
-    public PerspectiveCamera getCamera() {
+    public Camera getCamera() {
         return camera;
     }
 
-    public static List<Light> lights = new ArrayList<>();
+    private DirectionalLight directionalLight;
+    private List<PointLight> pointLights = new ArrayList<>();
+    private List<SpotLight> spotLights = new ArrayList<>();
 
-    protected void addLight(Light light) {
-        lights.add(light);
+    public void setDirectionalLight(DirectionalLight directionalLight) {
+        this.directionalLight = directionalLight;
     }
 
-    protected void removeLight(int index) {
-        lights.remove(index);
+    protected void addLight(PointLight pointLight) {
+        pointLights.add(pointLight);
     }
 
-    public List<Light> getLights() {
-        return lights;
+    protected void addLight(SpotLight spotLight) {
+        spotLights.add(spotLight);
     }
 
+    protected void removeLight(PointLight pointLight) {
+        pointLights.remove(pointLight);
+    }
+
+    protected void removeLight(SpotLight spotLight) {
+        spotLights.remove(spotLight);
+    }
+
+    public DirectionalLight getDirectionalLight() {
+        return directionalLight;
+    }
+
+    /**
+     * @return Возвращает иммутабельный список точечных источников освещения
+     */
+    public List<PointLight> getPointLights() {
+        return Collections.unmodifiableList(pointLights);
+    }
+
+    /**
+     * @return Возвращает иммутабельный список направленных источников освещения
+     */
+    public List<SpotLight> getSpotLights() {
+        return Collections.unmodifiableList(spotLights);
+    }
 }

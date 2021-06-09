@@ -2,7 +2,6 @@ package ru.reactiveturtle.game.world;
 
 import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.base.Renderable;
-import ru.reactiveturtle.engine.shader.TextureShader;
 import ru.reactiveturtle.engine.shadow.ShadowRenderable;
 import ru.reactiveturtle.engine.toolkit.ReactiveList;
 import ru.reactiveturtle.game.MainGame;
