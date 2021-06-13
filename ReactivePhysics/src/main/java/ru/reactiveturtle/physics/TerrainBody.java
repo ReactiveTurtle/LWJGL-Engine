@@ -1,9 +1,8 @@
 package ru.reactiveturtle.physics;
 
-import org.joml.Vector2f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
+import org.joml.*;
 
+import java.lang.Math;
 import java.util.Arrays;
 
 public class TerrainBody extends RigidBody {
@@ -37,41 +36,34 @@ public class TerrainBody extends RigidBody {
     }
 
     public Float getY(float x, float z) {
-        try {
-            float mapX = (x + width / 2f + getX()) / width * (textureWidth);
-            float mapZ = (z + height / 2f + getZ()) / height * (textureHeight);
-
-            float mapModX = (float) (mapX - Math.floor(mapX));
-            float mapModZ = (float) (mapZ - Math.floor(mapZ));
-
-            mapX = (int) mapX;
-            mapZ = (int) mapZ;
-
+        float mapX = (x - getX()) / width * (textureWidth);
+        float mapZ = (z - getZ()) / height * (textureHeight);
+        mapX = (float) Math.floor(mapX);
+        mapZ = (float) Math.floor(mapZ);
+        if (mapX >= 0 && mapX < textureWidth && mapZ >= 0 && mapZ < textureHeight) {
             int positionLeftTop = ((int) (mapZ * (textureWidth) + mapX)) * 18 + 3;
             int positionRightTop = positionLeftTop + 3;
             int positionLeftBottom = positionLeftTop - 3;
             int positionRightBottom = positionLeftTop + 9;
 
             Vector3f A = new Vector3f(vertices[positionRightTop], vertices[positionRightTop + 1], vertices[positionRightTop + 2]);
+            Vector3f B;
             Vector3f C = new Vector3f(vertices[positionLeftBottom], vertices[positionLeftBottom + 1], vertices[positionLeftBottom + 2]);
             if (new Vector2f(x, z).sub(new Vector2f(vertices[positionLeftTop], vertices[positionLeftTop + 2])).length() <
                     new Vector2f(x, z).sub(new Vector2f(vertices[positionRightBottom], vertices[positionRightBottom + 2])).length()) {
-                Vector3f B = new Vector3f(vertices[positionLeftTop], vertices[positionLeftTop + 1], vertices[positionLeftTop + 2]);
-                float xsFactor = (B.y - A.y) * (C.z - A.z) - (B.z - A.z) * (C.y - A.y);
-                float ysFactor = -((B.x - A.x) * (C.z - A.z) - (B.z - A.z) * (C.x - A.x));
-                float zsFactor = (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x);
-                float D = -A.x * xsFactor - A.y * ysFactor - A.z * zsFactor;
-                return (-xsFactor * x - zsFactor * z - D) / ysFactor;
+                B = new Vector3f(vertices[positionLeftTop], vertices[positionLeftTop + 1], vertices[positionLeftTop + 2]);
+                Plane plane = new Plane(A, B, C);
+                Line line = new Line(new Vector3f(0, 1, 0), new Vector3f(x - getX(), 0, z - getZ()));
+                return line.intersects(plane).y;
             } else {
-                Vector3f B = new Vector3f(vertices[positionRightBottom], vertices[positionRightBottom + 1], vertices[positionRightBottom + 2]);
-                float xsFactor = (B.y - A.y) * (C.z - A.z) - (B.z - A.z) * (C.y - A.y);
-                float ysFactor = -((B.x - A.x) * (C.z - A.z) - (B.z - A.z) * (C.x - A.x));
-                float zsFactor = (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x);
-                float D = -A.x * xsFactor - A.y * ysFactor - A.z * zsFactor;
-                return (-xsFactor * x - zsFactor * z - D) / ysFactor;
+                B = new Vector3f(vertices[positionRightBottom], vertices[positionRightBottom + 1], vertices[positionRightBottom + 2]);
+
             }
-        } catch (IndexOutOfBoundsException e) {
-            return -200f;
+            Plane plane = new Plane(A, B, C);
+            Line line = new Line(new Vector3f(0, 1, 0), new Vector3f(x - getX(), 0, z - getZ()));
+            return line.intersects(plane).y;
+        } else {
+            return null;
         }
     }
 }

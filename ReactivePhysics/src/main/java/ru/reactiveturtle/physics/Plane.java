@@ -16,10 +16,19 @@ public class Plane {
     }
 
     public Plane(Vector3f first, Vector3f second, Vector3f third) {
+        this.position = new Vector3f(first);
         xFactor = (second.y - first.y) * (third.z - first.z) - (second.z - first.z) * (third.y - first.y);
         yFactor = -((second.x - first.x) * (third.z - first.z) - (second.z - first.z) * (third.x - first.x));
         zFactor = (second.x - first.x) * (third.y - first.y) - (second.y - first.y) * (third.x - first.x);
         dFactor = -first.x * xFactor - first.y * yFactor - first.z * zFactor;
+    }
+
+    public Vector3f getNormal() {
+        return new Vector3f(xFactor, yFactor, zFactor);
+    }
+
+    public Vector3f getPosition() {
+        return position;
     }
 
     public boolean isPointAtFront(Vector3f point) {

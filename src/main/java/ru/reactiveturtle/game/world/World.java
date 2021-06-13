@@ -7,7 +7,6 @@ import ru.reactiveturtle.engine.material.Material;
 import ru.reactiveturtle.engine.model.base.Sphere;
 import ru.reactiveturtle.engine.module.moving.MovingModule;
 import ru.reactiveturtle.engine.shader.ModelShader;
-import ru.reactiveturtle.engine.texture.Texture;
 import ru.reactiveturtle.engine.toolkit.MathExtensions;
 import ru.reactiveturtle.engine.ui.Label;
 import ru.reactiveturtle.game.Log;
@@ -17,13 +16,8 @@ import ru.reactiveturtle.game.base.ModelLoader;
 import ru.reactiveturtle.game.player.Player;
 import ru.reactiveturtle.game.player.PlayerMovingModule;
 import ru.reactiveturtle.game.types.Collectable;
-import ru.reactiveturtle.physics.TerrainBody;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 
 public class World extends Stage3D {
     private MovingModule playerMovingModule;
@@ -31,7 +25,7 @@ public class World extends Stage3D {
     private DayNight dayNight;
     private Physic physic;
     private Player player;
-    private List<Chunk> chunks = new ArrayList<>();
+    private ChunkManager chunkManager;
     private LootMap lootMap;
 
     private Sun sun;
@@ -138,22 +132,8 @@ public class World extends Stage3D {
 
         setDirectionalLight(dayNight.getLight());
 
-        Texture texture = new Texture("texture/sand.jpg");
-        for (int i = -10; i < 10; i++) {
-            for (int j = -10; j < 10; j++) {
-                Chunk chunk = new Chunk(314124, j, i, texture);
-                chunk.setShader(modelShader);
-                chunks.add(chunk);
-                TerrainBody terrainBody = new TerrainBody(
-                        chunk.getTerrain().getVertices(),
-                        Chunk.X_PARTS,
-                        Chunk.Z_PARTS,
-                        Chunk.CHUNK_WIDTH,
-                        Chunk.CHUNK_DEPTH);
-                terrainBody.setPosition(chunk.getTerrain().getPosition());
-                physic.putBody(terrainBody);
-            }
-        }
+        chunkManager = new ChunkManager((MainGame) getGameContext(), physic, player.getCameraPosition());
+
         lootMap = new LootMap((MainGame) getGameContext(), physic);
 
         playerMovingModule = new PlayerMovingModule(this);
@@ -218,9 +198,10 @@ public class World extends Stage3D {
         physic.update(deltaTime);
 
         if (!player.isLockYMove()) {
-            camera.addPosition(playerTranslation.mul(10));
+            camera.addPosition(playerTranslation);
         } else {
             player.setPosition(player.getRigidBody().getPosition().add(0, 1.85f, 0));
+            chunkManager.update(player.getCameraPosition(), (MainGame) getGameContext(), physic);
             camera.setPosition(player.getCameraPosition());
         }
 
@@ -228,28 +209,23 @@ public class World extends Stage3D {
                 player,
                 lootMap);
 
+        Vector3f playerPosition = player.getPosition();
+        playerPosition.x = MathExtensions.round(playerPosition.x, 1);
+        playerPosition.y = MathExtensions.round(playerPosition.y, 1);
+        playerPosition.z = MathExtensions.round(playerPosition.z, 1);
+
         dayNight.update(deltaTime);
-        for (Chunk chunk : chunks) {
-            chunk.render(this);
-        }
+        chunkManager.render(this);
         lootMap.render(this);
         sun.render(this);
         player.render(this, deltaTime);
         sphere.render(this);
 
-        Vector3f playerPosition = player.getPosition();
-        playerPosition.x = MathExtensions.round(playerPosition.x, 1);
-        playerPosition.y = MathExtensions.round(playerPosition.y, 1);
-        playerPosition.z = MathExtensions.round(playerPosition.z, 1);
         String observable = "";
         if (player.getObservableEntity() != null) {
             Entity entity = player.getObservableEntity();
             observable = entity.toString();
         }
-        int chunkX = (int) (playerPosition.x / Chunk.CHUNK_WIDTH);
-        int chunkZ = (int) (playerPosition.z / Chunk.CHUNK_DEPTH);
-        int index = (chunkZ + 10) * 20 + chunkX + 10;
-        Chunk chunk = chunks.get(index);
         logLabel.setText("x: " + playerPosition.x
                 + "\ny: " + playerPosition.y
                 + "\nz: " + playerPosition.z
@@ -257,11 +233,6 @@ public class World extends Stage3D {
                 + "\nx: " + MathExtensions.round(camera.getX(), 1)
                 + "\ny: " + MathExtensions.round(camera.getY(), 1)
                 + "\nz: " + MathExtensions.round(camera.getZ(), 1)
-                + "\nchunkX: " + chunk.getTerrain().getX()
-                + "\nchunkZ: " + chunk.getTerrain().getZ()
-                + "\nchunkX: " + chunkX
-                + "\nchunkZ: " + chunkZ
-                + "\nindex: " + index
                 + "\n" + Log.inFrustum
                 + observable);
         logLabel.setPosition(logLabel.getWidth() - getGameContext().getAspectRatio(), 1 - logLabel.getHeight(), 0);

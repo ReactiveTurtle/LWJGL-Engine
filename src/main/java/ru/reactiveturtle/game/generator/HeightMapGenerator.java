@@ -1,7 +1,5 @@
 package ru.reactiveturtle.game.generator;
 
-import org.joml.Math;
-import org.lwjgl.system.MathUtil;
 import ru.reactiveturtle.engine.material.Material;
 import ru.reactiveturtle.engine.texture.Texture;
 import ru.reactiveturtle.engine.model.terrain.Terrain;
@@ -18,7 +16,7 @@ public class HeightMapGenerator {
                                             Texture texture) {
         float[] vertices = new float[(X_PARTS) * (Z_PARTS) * 18];
         int startIntX = chunkX * X_PARTS, startIntZ = chunkZ * Z_PARTS;
-        float startX = -CHUNK_WIDTH / 2, startZ = -CHUNK_DEPTH / 2;
+        float startX = 0, startZ = 0;
         for (int i = 0; i < Z_PARTS; i++) {
             for (int j = 0; j < X_PARTS; j++) {
                 int index = (i * (X_PARTS) + j) * 18;
@@ -47,25 +45,21 @@ public class HeightMapGenerator {
                 vertices[index + 17] = startZ + PART_DEPTH * (i + 1);
             }
         }
-        Material heightMapMaterial = new Material();
-        heightMapMaterial.setDiffuse(1f, 1f, 1f);
-        heightMapMaterial.setTexture(texture);
         Terrain terrain = new Terrain(CHUNK_WIDTH, CHUNK_DEPTH, vertices, X_PARTS + 1, Z_PARTS + 1, 1f, 1f);
         terrain.setPosition(chunkX * CHUNK_WIDTH + startX, 0, chunkZ * CHUNK_DEPTH + startZ);
-        terrain.setMaterial(heightMapMaterial);
         return terrain;
     }
 
     public static float getHeight(long seed, float x, float y) {
-        return (genNumber(seed, x, y) / 2 + 0.5f) * 255;
+        return (genNumber(seed, x, y)) * 10;
     }
 
     private static float genNumber(long seed, float x, float z) {
         double dx = x / CHUNK_WIDTH;
         double dz = z / CHUNK_DEPTH;
         Random random = new Random(seed);
-        double frequencyX = random.nextDouble() * 2 + 2;
-        double frequencyY = random.nextDouble() * 2 + 2;
+        double frequencyX = random.nextDouble() + 2;
+        double frequencyY = random.nextDouble() + 2;
         return (float) MathExtensions.noise(dx * frequencyX + seed, dz * frequencyY + seed);
     }
 }

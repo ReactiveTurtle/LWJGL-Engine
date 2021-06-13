@@ -108,15 +108,15 @@ vec4 getDirectionalLightColor() {
 
     vec4 color = material.emission;
 
-    color += material.ambient * directionalLight.ambient;
+    color = max(material.ambient * directionalLight.ambient, color);
 
     float nDotL = max(dot(normal, lightDirection), 0.0f);
-    color += material.diffuse * directionalLight.diffuse * nDotL;
+    color = max(color, material.diffuse * directionalLight.diffuse * nDotL);
 
     float rDotVPow = max(pow(dot(reflect(-lightDirection, normal), cameraDirection), material.reflectance), 0.0f);
-    color += material.specular * directionalLight.specular * rDotVPow;
+    color = max(color, material.specular * directionalLight.specular * rDotVPow);
 
-    color += clamp(color * calcShadow(directionalLight.shadowMapTextureSampler, directionalLight.mvpMatrix * fVertex4), vec4(0), vec4(1));
+    color = clamp(color * calcShadow(directionalLight.shadowMapTextureSampler, directionalLight.mvpMatrix * fVertex4), vec4(0), vec4(1));
     return color;
 }
 

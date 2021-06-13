@@ -205,7 +205,6 @@ public class BoxBody extends RigidBody {
             PlaneBody planeBody = (PlaneBody) rigidBody;
             boolean isCollide = false;
             Vector3f translationAxis = new Vector3f();
-            // FIXME: 30.08.2020
             for (int i = 0; i < testCount + 1 && !isCollide; i++) {
                 isCollide = isBoxIntersectsPlane(planeBody.getNormal(),
                         planeBody.getPosition(), translationAxis);
@@ -227,13 +226,14 @@ public class BoxBody extends RigidBody {
             float currentY = position.y + center.y;
             boolean isCollide = false;
             float yTranslation = 0;
+
             for (int i = 0; i < testCount + 1 && !isCollide; i++) {
-                isCollide = currentY + translation.y * i / testCount < y;
+                isCollide = (currentY + translation.y * i / testCount) < y;
                 if (!isCollide) {
                     yTranslation = translation.y * i / testCount;
                 }
             }
-            if (currentY <= y) {
+            if (currentY < y) {
                 yTranslation = y - currentY;
                 if (startFlyY == 0) {
                     isCollide = false;

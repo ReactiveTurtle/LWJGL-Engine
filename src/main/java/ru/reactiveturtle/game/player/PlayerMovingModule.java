@@ -42,7 +42,7 @@ public class PlayerMovingModule extends MovingModule {
         translation.rotateY(-camera.getRotationY());
 
         if (player.isLockYMove()) {
-            player.getRigidBody().translate(translation.mul(10));
+            player.getRigidBody().translate(translation);
         }
         return translation;
     }

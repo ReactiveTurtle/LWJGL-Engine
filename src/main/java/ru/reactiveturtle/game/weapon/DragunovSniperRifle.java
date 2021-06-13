@@ -19,7 +19,7 @@ public class DragunovSniperRifle extends Weapon {
         BoxBody boxBody = new BoxBody(new Vector3f(2.25f, 0.8f, 0.15f));
         boxBody.setCenter(new Vector3f(-0.6f, 0f, 0));
         boxBody.setType(RigidBody.Type.DYNAMIC);
-        boxBody.setY(6f);
+        boxBody.setY(100f);
         return new EntityPhase[]{
                 new EntityPhase(this, modelLoader.getDragunovSniperRiffle(), boxBody)
         };
@@ -27,7 +27,7 @@ public class DragunovSniperRifle extends Weapon {
 
     @Override
     protected Shader initShader() {
-        return gameContext.getShaderLoader().getTextureShader();
+        return gameContext.getShaderLoader().getModelShader();
     }
 
     private static WeaponData getDefaultWeaponData() {

@@ -18,7 +18,7 @@ public class Wall extends Entity {
 
     @Override
     protected Shader initShader() {
-        return gameContext.getShaderLoader().getTextureShader();
+        return gameContext.getShaderLoader().getModelShader();
     }
 
     @Override

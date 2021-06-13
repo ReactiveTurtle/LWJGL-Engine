@@ -10,7 +10,7 @@ public final class ShaderLoader implements Disposeable {
 
     private Value<ModelShader> textureShader = new Value<>();
 
-    public ModelShader getTextureShader() {
+    public ModelShader getModelShader() {
         if (!textureShader.hasValue()) {
             textureShader.value = new ModelShader();
         }

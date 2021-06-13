@@ -11,8 +11,6 @@ public class Physic {
 
     public Physic() {
         world = new World(new Vector3f(0, 9.8f, 0));
-        PlaneBody planeBody = new PlaneBody(new Vector3f(0f, 1f, 0f));
-        world.addRigidBodies(planeBody);
     }
 
     public void putBody(RigidBody rigidBody) {

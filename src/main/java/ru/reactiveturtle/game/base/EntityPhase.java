@@ -44,7 +44,7 @@ public class EntityPhase implements ShadowRenderable, Renderable<Stage3D>, Dispo
             model.render(stage);
 
             // For debugging
-            //debug(stage);
+            debug(stage);
         }
     }
 

@@ -7,13 +7,14 @@ import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.base.Transform3D;
 import ru.reactiveturtle.engine.module.moving.Movable;
 import ru.reactiveturtle.engine.shadow.ShadowRenderable;
+import ru.reactiveturtle.game.Helper;
 import ru.reactiveturtle.game.MainGame;
 import ru.reactiveturtle.game.base.Entity;
-import ru.reactiveturtle.game.base.ModelLoader;
 import ru.reactiveturtle.game.player.inventory.Inventory;
 import ru.reactiveturtle.game.player.inventory.InventoryItem;
 import ru.reactiveturtle.game.types.Builder;
 import ru.reactiveturtle.game.types.Destroyer;
+import ru.reactiveturtle.game.world.BoxBodyModel;
 import ru.reactiveturtle.physics.BoxBody;
 import ru.reactiveturtle.physics.RigidBody;
 
@@ -272,7 +273,7 @@ public class Player extends Transform3D implements Movable, ShadowRenderable {
         }
 
         /*BoxBodyModel boxBodyModel = Helper.bodyToModel(rigidBody);
-        boxBodyModel.setShader(textureShader);
+        boxBodyModel.setShader(gameContext.getShaderLoader().getModelShader());
         boxBodyModel.render(stage);*/
     }
 

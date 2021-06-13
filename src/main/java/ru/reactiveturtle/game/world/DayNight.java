@@ -23,15 +23,7 @@ public class DayNight {
         directionalLight.setDirection(1, 0, 1);
         directionalLight.setShadowMap(new ShadowMap());
         angle = (float) (Math.PI / 3f);
-        if (!isDay) {
-            skyColor.set(37 / 255f, 50 / 255f, 80 / 255f).div(2);
-            diffuse.set(189 / 255f, 208f / 255f, 228 / 255f).div(8);
-            ambient.set(new Vector3f(diffuse).div(4));
-        } else {
-            ambient.set(0.3f, 0.3f, 0.25f);
-            diffuse.set(0.5f, 0.5f, 0.4f);
-            skyColor.set(117 / 255f, 187 / 255f, 253 / 255f);
-        }
+        updateLight();
     }
 
     public void update(double deltaTime) {
@@ -42,21 +34,25 @@ public class DayNight {
         if (angle >= Math.PI) {
             angle = (float) (angle % Math.PI);
             isDay = !isDay;
-            if (!isDay) {
-                skyColor.set(37 / 255f, 50 / 255f, 80 / 255f).div(2);
-                diffuse.set(189 / 255f, 208f / 255f, 228 / 255f).div(4);
-                ambient.set(new Vector3f(diffuse).div(4));
-            } else {
-                ambient.set(0.3f, 0.3f, 0.2f);
-                diffuse.set(0.5f, 0.5f, 0.3f);
-                skyColor.set(117 / 255f, 187 / 255f, 253 / 255f);
-            }
+            updateLight();
         }
         directionalLight.setDirection((float) Math.cos(Math.PI - angle), (float) Math.sin(angle), 0);
         Vector3f skyColor = new Vector3f(this.skyColor).mul(directionalLight.getDirection().y);
         glClearColor(skyColor.x,
                 skyColor.y,
                 skyColor.z, 1f);
+    }
+
+    private void updateLight() {
+        if (!isDay) {
+            skyColor.set(37 / 255f, 50 / 255f, 80 / 255f).div(2);
+            diffuse.set(189 / 255f, 208f / 255f, 228 / 255f).div(8);
+            ambient.set(new Vector3f(diffuse).div(4));
+        } else {
+            skyColor.set(117 / 255f, 187 / 255f, 253 / 255f);
+            diffuse.set(1f, 1f, 0.8f);
+            ambient.set(0.3f, 0.3f, 0.25f);
+        }
     }
 
     public DirectionalLight getLight() {
