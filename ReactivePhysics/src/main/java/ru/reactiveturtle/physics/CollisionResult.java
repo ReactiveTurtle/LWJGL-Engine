@@ -64,4 +64,13 @@ public class CollisionResult {
         isYCollide = false;
         isZCollide = false;
     }
+
+    @Override
+    public String toString() {
+        return "CollisionResult{" +
+                "isXCollide=" + isXCollide +
+                ", isYCollide=" + isYCollide +
+                ", isZCollide=" + isZCollide +
+                '}';
+    }
 }

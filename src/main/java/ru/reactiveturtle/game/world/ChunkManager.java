@@ -5,11 +5,12 @@ import org.joml.Vector3f;
 import ru.reactiveturtle.engine.base.Renderable;
 import ru.reactiveturtle.engine.base3d.Stage3D;
 import ru.reactiveturtle.engine.material.Material;
+import ru.reactiveturtle.engine.shadow.ShadowRenderable;
 import ru.reactiveturtle.engine.texture.Texture;
 import ru.reactiveturtle.game.MainGame;
 import ru.reactiveturtle.physics.TerrainBody;
 
-public class ChunkManager implements Renderable<Stage3D> {
+public class ChunkManager implements ShadowRenderable, Renderable<Stage3D> {
     private Vector3f position;
     private int chunksRenderCount = 2;
     public Chunk[][] chunks = new Chunk[chunksRenderCount * 2][chunksRenderCount * 2];
@@ -70,5 +71,10 @@ public class ChunkManager implements Renderable<Stage3D> {
                 physic.putBody(chunk.getTerrainBody());
             }
         }
+    }
+
+    @Override
+    public void renderShadow(Stage3D stage) {
+        
     }
 }

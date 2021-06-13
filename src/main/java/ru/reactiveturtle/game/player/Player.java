@@ -218,14 +218,8 @@ public class Player extends Transform3D implements Movable, ShadowRenderable {
         mRightHandItem = mInventory.getCurrentItem();
         mUI.updateInventoryImage(mInventory);
 
-        Quaternionf quaternionf = new Quaternionf();
-        quaternionf.rotateYXZ(
-                getRotationY(),
-                getRotationX(),
-                getRotationZ());
-
         Vector3f vector3f = new Vector3f(0, 0, 2);
-        vector3f.rotate(quaternionf);
+        vector3f.rotateY(getRotationY());
 
         Entity entity = item.takeEntity(gameContext);
         entity.setPosition(getPosition().add(vector3f));

@@ -65,7 +65,14 @@ public abstract class RigidBody extends Transform3D implements Cloneable {
     @Override
     public String toString() {
         return "RigidBody{" +
-                "type=" + type +
+                "translation=" + translation +
+                ", flyTime=" + flyTime +
+                ", startYVelocity=" + startYVelocity +
+                ", startFlyY=" + startFlyY +
+                ", lastY=" + lastY +
+                ", id=" + id +
+                ", tag='" + tag + '\'' +
+                ", type=" + type +
                 '}';
     }
 }

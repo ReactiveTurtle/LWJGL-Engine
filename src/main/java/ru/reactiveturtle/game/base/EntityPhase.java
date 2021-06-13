@@ -8,7 +8,6 @@ import ru.reactiveturtle.engine.model.Model;
 import ru.reactiveturtle.engine.base.Renderable;
 import ru.reactiveturtle.engine.shadow.ShadowRenderable;
 import ru.reactiveturtle.game.Helper;
-import ru.reactiveturtle.game.Log;
 import ru.reactiveturtle.game.world.BoxBodyModel;
 import ru.reactiveturtle.physics.BoxBody;
 
@@ -28,19 +27,22 @@ public class EntityPhase implements ShadowRenderable, Renderable<Stage3D>, Dispo
 
     @Override
     public void render(Stage3D stage) {
-        Vector3f position = entity.getPosition();
-        Vector3f rotation = entity.getRotation();
-
-        body.setPosition(position);
-        body.setRotation(rotation);
+        if (entity.isEntityPositionUpdated) {
+            Vector3f position = entity.getPosition();
+            body.setPosition(position);
+            entity.isEntityPositionUpdated = false;
+        }
+        if (entity.isEntityRotationUpdated) {
+            Vector3f rotation = entity.getRotation();
+            body.setRotation(rotation);
+            entity.isEntityRotationUpdated = false;
+        }
 
         Frustum frustum = stage.getCamera().getFrustum();
         boolean isInFrustum = frustum.isFigureInFrustum(body.getBoxPoints());
         if (isInFrustum) {
-            Log.addInFrustumEntityKey((String) model.getMeshes().keySet().toArray()[0]);
-
-            model.setPosition(position);
-            model.setRotation(rotation);
+            model.setPosition(body.getPosition());
+            model.setRotation(body.getRotation());
             model.render(stage);
 
             // For debugging
@@ -56,17 +58,7 @@ public class EntityPhase implements ShadowRenderable, Renderable<Stage3D>, Dispo
 
     @Override
     public void renderShadow(Stage3D stage) {
-        Frustum frustum = stage.getCamera().getFrustum();
-        if (isInFrustumCalled) {
-            if (isInFrustum) {
-                model.renderShadow(stage);
-            }
-            isInFrustumCalled = false;
-            isInFrustum = false;
-        } else if ((isInFrustum = frustum.isFigureInFrustum(body.getBoxPoints()))) {
-            model.renderShadow(stage);
-            isInFrustumCalled = true;
-        }
+        model.renderShadow(stage);
     }
 
     public BoxBody getBody() {

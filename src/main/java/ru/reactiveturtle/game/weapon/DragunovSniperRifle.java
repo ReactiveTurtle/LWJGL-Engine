@@ -17,9 +17,9 @@ public class DragunovSniperRifle extends Weapon {
 
     protected EntityPhase[] getDefaultEntityPhases(ModelLoader modelLoader) {
         BoxBody boxBody = new BoxBody(new Vector3f(2.25f, 0.8f, 0.15f));
+        boxBody.tag = "Dragunov Sniper Riffle";
         boxBody.setCenter(new Vector3f(-0.6f, 0f, 0));
         boxBody.setType(RigidBody.Type.DYNAMIC);
-        boxBody.setY(100f);
         return new EntityPhase[]{
                 new EntityPhase(this, modelLoader.getDragunovSniperRiffle(), boxBody)
         };

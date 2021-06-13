@@ -16,11 +16,10 @@ public class World {
     }
 
     public void update(double deltaTime, int testCount) {
-        long startTime = System.currentTimeMillis();
         if (testCount < 1) {
             throw new IllegalArgumentException("Parameter testCount must be >= 1");
         }
-        if (deltaTime < 0) {
+        if (deltaTime <= 0) {
             throw new IllegalArgumentException("Parameter deltaTime must be >= 0");
         }
 
@@ -31,23 +30,28 @@ public class World {
         for (int i = 0; i < rigidBodies.size(); i++) {
             RigidBody first = rigidBodies.get(i);
             if (first.getType() != RigidBody.Type.STATIC) {
+                float lastFlyTime = first.flyTime;
                 first.flyTime += deltaTime;
-                float yTranslation = (first.startFlyY + first.startYVelocity * first.flyTime +
-                        (-9.8f * first.flyTime * first.flyTime / 2)) - first.lastY;
+                float oldY = (first.startFlyY + first.startYVelocity * lastFlyTime +
+                        (-9.8f * lastFlyTime * lastFlyTime / 2));
+                float newY = (first.startFlyY + first.startYVelocity * first.flyTime +
+                        (-9.8f * first.flyTime * first.flyTime / 2));
+                float yTranslation = newY - oldY;
                 first.translation.add(0, yTranslation, 0);
                 CollisionResult collisionResult = rigidBodyCollisions.get(i);
                 for (int j = 0; j < rigidBodies.size(); j++) {
                     if (i != j) {
                         RigidBody second = rigidBodies.get(j);
                         CollisionResult result = first.isCollide(second, testCount);
-
-                        CollisionResult newCollision = rigidBodyCollisions.get(j);
-                        newCollision.add(result);
-                        collisionResult.add(newCollision);
-                        rigidBodyCollisions.set(j, newCollision);
+                        collisionResult.add(result);
                     }
                 }
                 rigidBodyCollisions.set(i, collisionResult);
+                if (first.tag.equals("Dragunov Sniper Riffle")) {
+                    System.out.println(first);
+                    System.out.println(newY);
+                    System.out.println(yTranslation);
+                }
                 if (rigidBodyCollisions.get(i).isYCollide()) {
                     first.startYVelocity = 0;
                     first.flyTime = 0;
@@ -58,16 +62,19 @@ public class World {
 
         for (int i = 0; i < rigidBodyCollisions.size(); i++) {
             RigidBody rigidBody = rigidBodies.get(i);
-            if (rigidBody.getType() != RigidBody.Type.STATIC) {
-                rigidBody.addPosition(rigidBody.translation);
-                rigidBody.lastY = rigidBody.getY();
-            }
-            rigidBody.log = rigidBodyCollisions.get(i).isXCollide() + ", "
+            rigidBody.log = rigidBody.tag + ": "
+                    + rigidBodyCollisions.get(i).isXCollide() + ", "
                     + rigidBodyCollisions.get(i).isYCollide() + ", "
                     + rigidBodyCollisions.get(i).isZCollide() + ", "
                     + rigidBody.translation.x + ", "
                     + rigidBody.translation.y + ", "
                     + rigidBody.translation.z + ", ";
+            if (rigidBody.getType() != RigidBody.Type.STATIC) {
+                rigidBody.addPosition(rigidBody.translation);
+                if (rigidBody.tag.equals("Dragunov Sniper Riffle")) {
+                    System.out.println(rigidBody.log);
+                }
+            }
             rigidBody.translation.set(0);
         }
     }

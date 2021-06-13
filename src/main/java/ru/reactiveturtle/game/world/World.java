@@ -207,7 +207,8 @@ public class World extends Stage3D {
 
         getGameContext().getShadowManager().renderShadow(this,
                 player,
-                lootMap);
+                lootMap,
+                 chunkManager);
 
         Vector3f playerPosition = player.getPosition();
         playerPosition.x = MathExtensions.round(playerPosition.x, 1);
@@ -219,7 +220,6 @@ public class World extends Stage3D {
         lootMap.render(this);
         sun.render(this);
         player.render(this, deltaTime);
-        sphere.render(this);
 
         String observable = "";
         if (player.getObservableEntity() != null) {

@@ -59,6 +59,23 @@ public abstract class Entity extends Transform3D implements Renderable<Stage3D>,
         entityPhase.renderShadow(stage);
     }
 
+    boolean isEntityPositionUpdated = false;
+
+    @Override
+    public void setPosition(float x, float y, float z) {
+        super.setPosition(x, y, z);
+        isEntityPositionUpdated = true;
+    }
+
+    boolean isEntityRotationUpdated = false;
+
+    @Override
+    public void setRotation(float x, float y, float z) {
+        super.setRotation(x, y, z);
+        isEntityRotationUpdated = true;
+    }
+
+
     @Override
     public void dispose() {
         for (EntityPhase phase : entityPhases) {
